@@ -1,0 +1,64 @@
+name: sourceplane-thinci
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  plan:
+    name: ThinCI Plan
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Sourceplane
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/sourceplane/cli/main/install.sh | sh
+
+      - name: Generate plan
+        run: |
+          sp thinci plan --github --changed-only > plan.json
+
+      - name: Convert plan → matrix
+        id: matrix
+        run: |
+          echo "matrix=$(jq -c '{include: .jobs | map({ job_id: .id, runs_on: (.metadata.runsOn // "ubuntu-latest") })}' plan.json)" >> $GITHUB_OUTPUT
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: thinci-plan
+          path: plan.json
+
+
+  execute:
+    name: Execute ThinCI Jobs
+    needs: plan
+    if: ${{ fromJson(needs.plan.outputs.matrix).include != null }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+
+    runs-on: ${{ matrix.runs_on }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Sourceplane
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/sourceplane/cli/main/install.sh | sh
+
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: thinci-plan
+
+      - name: Execute job from plan
+        run: |
+          sp thinci run \
+            --github \
+            --plan plan.json \
+            --job-id "${{ matrix.job_id }}"
