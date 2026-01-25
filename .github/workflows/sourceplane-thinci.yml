@@ -1,4 +1,4 @@
-name: sourceplane-thinci
+name: CI
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   plan:
-    name: ThinCI Plan
+    name: CI Plan
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -35,7 +35,7 @@ jobs:
 
 
   execute:
-    name: Execute ThinCI Jobs
+    name: Run
     needs: plan
     if: ${{ fromJson(needs.plan.outputs.matrix).include != null }}
     strategy:
