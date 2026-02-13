@@ -14,14 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Sourceplane
+      - name: Install thin
         run: |
           curl -fsSL https://raw.githubusercontent.com/sourceplane/thin/main/install.sh | sh
 
       - name: Generate plan
         run: |
-          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.2
-          thin ci plan
+          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.3
+          thin ci plan --view dag
 
       - name: Convert plan → matrix
         id: matrix
@@ -48,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Sourceplane
+      - name: Install thin
         run: |
           curl -sSfL https://raw.githubusercontent.com/sourceplane/cli/main/install.sh | sh
 
