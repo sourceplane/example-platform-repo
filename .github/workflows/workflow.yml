@@ -16,11 +16,12 @@ jobs:
 
       - name: Install Sourceplane
         run: |
-          curl -sSfL https://raw.githubusercontent.com/sourceplane/cli/main/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/sourceplane/thin/main/install.sh | sh
 
       - name: Generate plan
         run: |
-          sp thinci plan --github --changed-only > plan.json
+          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.2
+          thin ci plan
 
       - name: Convert plan → matrix
         id: matrix
