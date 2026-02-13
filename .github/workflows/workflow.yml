@@ -20,7 +20,7 @@ jobs:
 
       - name: Generate plan
         run: |
-          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.3
+          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.4
           thin ci plan --view dag
 
       - name: Convert plan → matrix
