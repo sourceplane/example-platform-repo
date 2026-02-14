@@ -18,9 +18,12 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/sourceplane/thin/main/install.sh | sh
 
-      - name: Generate plan
+      - name: Install thin provider
         run: |
           thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.5
+
+      - name: Generate plan
+        run: |          
           thin ci plan --changed --view dag
 
       - name: Convert plan → matrix
