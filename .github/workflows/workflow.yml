@@ -20,7 +20,7 @@ jobs:
 
       - name: Install thin provider
         run: |
-          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.9
+          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.10
 
       - name: Generate plan
         run: |          
