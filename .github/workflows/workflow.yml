@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate plan
         run: |          
-          thin ci plan --changed --view dag
+          thin ci plan --changed --base main --view dag
 
       - name: Convert plan → matrix
         id: matrix
