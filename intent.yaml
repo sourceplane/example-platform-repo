@@ -22,7 +22,7 @@ groups:
       owner: onboarding-team
       timeout: 30m
 
-forEach:
+environments:
   production:
     selectors:
       components:
@@ -66,9 +66,10 @@ components:
   - name: web-app
     type: helm
     domain: platform
+    path: services/hello-app
     enabled: true
     inputs:
-      version: "1.0.0"
+      version: "1.0.2"
       replicaCount: 2
       chart: oci://mycompany.azurecr.io/helm/charts/default
       imagePullPolicy: IfNotPresent
