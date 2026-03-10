@@ -14,17 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install thin
+      - name: Install tinx
         run: |
-          curl -fsSL https://raw.githubusercontent.com/sourceplane/thin/main/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/sourceplane/tinx/main/install.sh | sh
 
-      - name: Install thin provider
+      - name: Install tinx provider
         run: |
-          thin provider install ci ghcr.io/sourceplane/lite-ci:v0.2.13
+          tinx install ci ghcr.io/sourceplane/lite-ci-test:v0.0.2
 
       - name: Generate plan
         run: |          
-          thin ci plan --changed --base main --view dag
+          tinx ci plan --changed --base main --view dag --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions
 
       - name: Convert plan → matrix
         id: matrix
@@ -34,7 +34,7 @@ jobs:
       - name: Upload plan
         uses: actions/upload-artifact@v4
         with:
-          name: thinci-plan
+          name: plan
           path: plan.json
 
 
@@ -51,18 +51,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install thin
+      - name: Install tinx
         run: |
-          curl -sSfL https://raw.githubusercontent.com/sourceplane/cli/main/install.sh | sh
+          curl -fsSL https://raw.githubusercontent.com/sourceplane/tinx/main/install.sh | sh
+
+      - name: Install tinx provider
+        run: |
+          tinx install ci ghcr.io/sourceplane/lite-ci-test:v0.0.2
 
       - name: Download plan
         uses: actions/download-artifact@v4
         with:
-          name: thinci-plan
+          name: plan
 
       - name: Execute job from plan
         run: |
-          sp thinci run \
+          tinx ci run \
             --github \
             --plan plan.json \
             --job-id "${{ matrix.job_id }}"
