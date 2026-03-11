@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - id: tinx-plan
-        uses: sourceplane/tinx-action@v1
+        uses: sourceplane/tinx-action@v1.0.1
         with:
           run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 plan --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions --view dag
           artifacts: plan.json
