@@ -14,26 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install tinx
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/sourceplane/tinx/main/install.sh | sh
-
-      - name: Plan
-        run: |
-          tinx run ghcr.io/sourceplane/lite-ci-test:v0.0.2 plan \
-          --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions \
-          --view dag
+      - id: tinx-plan
+        uses: sourceplane/tinx-action@v1
+        with:
+          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 plan --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions --view dag
+          artifacts: plan.json
 
       - name: Convert plan → matrix
         id: matrix
         run: |
           echo "matrix=$(jq -c '{include: .jobs | map({ job_id: .id, runs_on: (.metadata.runsOn // "ubuntu-latest") })}' plan.json)" >> $GITHUB_OUTPUT
-
-      - name: Upload plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: plan
-          path: plan.json
 
 
   execute:
@@ -49,22 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install tinx
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/sourceplane/tinx/main/install.sh | sh
-
-      - name: Install tinx provider
-        run: |
-          tinx install ci ghcr.io/sourceplane/lite-ci-test:v0.0.2
-
       - name: Download plan
         uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: tinx-artifacts
 
-      - name: Execute job from plan
-        run: |
-          tinx ci run \
-            --github \
-            --plan plan.json \
-            --job-id "${{ matrix.job_id }}"
+      - uses: sourceplane/tinx-action@v1
+        with:
+          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 ci run --github --plan plan.json --job-id "${{ matrix.job_id }}"
