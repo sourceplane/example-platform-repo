@@ -44,6 +44,6 @@ jobs:
         with:
           name: tinx-artifacts
 
-      - uses: sourceplane/tinx-action@v1
+      - uses: sourceplane/tinx-action@v1.0.4
         with:
-          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 ci run --github --plan plan.json --job-id "${{ matrix.job_id }}"
+          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 run --github --plan plan.json --job-id "${{ matrix.job_id }}"
