@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate plan
         run: |          
-          tinx ci plan --changed --base main --view dag --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions
+          tinx ci plan --view dag --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions
 
       - name: Convert plan → matrix
         id: matrix
