@@ -18,13 +18,11 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/sourceplane/tinx/main/install.sh | sh
 
-      - name: Install tinx provider
+      - name: Plan
         run: |
-          tinx install ci ghcr.io/sourceplane/lite-ci-test:v0.0.2
-
-      - name: Generate plan
-        run: |          
-          tinx ci plan --view dag --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions
+          tinx run ghcr.io/sourceplane/lite-ci-test:v0.0.2 plan \
+          --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions \
+          --view dag
 
       - name: Convert plan → matrix
         id: matrix
