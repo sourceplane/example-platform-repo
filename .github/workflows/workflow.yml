@@ -10,7 +10,7 @@ jobs:
     name: CI Plan
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      tinx_outputs: ${{ steps.tinx-plan.outputs.outputs-json }}
     steps:
       - uses: actions/checkout@v4
 
@@ -19,22 +19,19 @@ jobs:
         with:
           run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 plan --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.1.0/assets/config/compositions --view dag
           artifacts: plan.json
-
-      - name: Convert plan → matrix
-        id: matrix
-        run: |
-          echo "matrix=$(jq -c '{include: .jobs | map({ job_id: .id, runs_on: (.metadata.runsOn // "ubuntu-latest") })}' plan.json)" >> $GITHUB_OUTPUT
+          outputs: |
+              matrix=plan.json
 
 
   execute:
     name: Run
     needs: plan
-    if: ${{ fromJson(needs.plan.outputs.matrix).include != null }}
+    if: ${{ fromJson(fromJson(needs.plan.outputs.tinx_outputs).matrix).jobs != null }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+      matrix: ${{ fromJson(format('{{"include":{0}}}', toJson(fromJson(fromJson(needs.plan.outputs.tinx_outputs).matrix).jobs))) }}
 
-    runs-on: ${{ matrix.runs_on }}
+    runs-on: ${{ matrix.metadata.runsOn || 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -46,4 +43,4 @@ jobs:
 
       - uses: sourceplane/tinx-action@v1.0.4
         with:
-          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 run --github --plan plan.json --job-id "${{ matrix.job_id }}"
+          run: ghcr.io/sourceplane/lite-ci-test:v0.0.2 run --plan plan.json --job-id "${{ matrix.id }}"
