@@ -17,7 +17,7 @@ jobs:
       - id: tinx-plan
         uses: sourceplane/tinx-action@v1
         with:
-          run: ghcr.io/sourceplane/lite-ci:v0.2.24 plan --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.2.24/assets/config/compositions --view dag
+          run: ghcr.io/sourceplane/lite-ci:v0.2.25 plan --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.2.25/assets/config/compositions --view dag
           artifacts: plan.json
           outputs: |
               matrix=plan.json
@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(format('{{"include":{0}}}', toJson(fromJson(fromJson(needs.plan.outputs.tinx_outputs).matrix).jobs))) }}
 
-    runs-on: ${{ matrix.metadata.runsOn || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.runsOn || 'ubuntu-22.04' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,4 +43,4 @@ jobs:
 
       - uses: sourceplane/tinx-action@v1
         with:
-          run: ghcr.io/sourceplane/lite-ci:v0.2.24 run --plan plan.json --job-id "${{ matrix.id }}"
+          run: ghcr.io/sourceplane/lite-ci:v0.2.25 run --plan plan.json --job-id "${{ matrix.id }}"
