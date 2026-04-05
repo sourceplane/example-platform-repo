@@ -63,7 +63,7 @@ jobs:
       scope: analysis
     steps:
       - name: add-repository
-        run: helm repo add mycompany oci://mycompany.azurecr.io/helm/charts
+        run: helm repo add external-secrets https://charts.external-secrets.io
         retry: 3
       - name: diff
         run: helm diff release {{.Component}} {{.chart}} --namespace {{.namespacePrefix}}{{.Component}} || true

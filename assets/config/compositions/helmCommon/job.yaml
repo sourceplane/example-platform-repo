@@ -14,7 +14,7 @@ jobs:
       type: common-services
     steps:
       - name: add-repository
-        run: helm repo add mycompany oci://mycompany.azurecr.io/helm/charts
+        run: helm repo add external-secrets https://charts.external-secrets.io
         retry: 3
       - name: update-repo
         run: helm repo update
