@@ -12,9 +12,6 @@ jobs:
     labels:
       scope: deployment
     steps:
-      - name: add-repository
-        run: helm repo add mycompany oci://mycompany.azurecr.io/helm/charts
-        retry: 3
       - name: add-external-secrets-repo
         run: helm repo add external-secrets https://charts.external-secrets.io
         retry: 3
