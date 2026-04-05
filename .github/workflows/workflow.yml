@@ -21,7 +21,7 @@ jobs:
             sourceplane/lite-ci:v0.2.25 as lite-ci
           run: |
             tinx -- lite-ci plan \
-            --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.2.25/assets/config/compositions \
+            --config-dir assets/config/compositions \
             --view dag 
           artifacts: plan.json
       - name: run plan
