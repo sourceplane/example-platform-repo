@@ -24,31 +24,9 @@ jobs:
             --config-dir ~/.tinx/providers/sourceplane/lite-ci/v0.2.25/assets/config/compositions \
             --view dag 
           artifacts: plan.json
-          outputs: |
-              matrix=plan.json
+      - name: run plan
+        run: tinx -- lite-ci run --plan plan.json --job-id "common-services@production.deploy"
 
 
-  execute:
-    name: Run
-    needs: plan
-    if: ${{ fromJson(fromJson(needs.plan.outputs.tinx_outputs).matrix).jobs != null }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(format('{{"include":{0}}}', toJson(fromJson(fromJson(needs.plan.outputs.tinx_outputs).matrix).jobs))) }}
 
-    runs-on: ${{ matrix.runsOn || 'ubuntu-22.04' }}
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tinx-artifacts
-
-      - uses: sourceplane/tinx-action@v2
-        with:
-          providers: |
-            sourceplane/lite-ci:v0.2.25 as lite-ci
-          run: |
-            tinx run lite-ci run --plan plan.json --job-id "${{ matrix.id }}"
