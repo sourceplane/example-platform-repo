@@ -19,11 +19,11 @@ jobs:
         run: helm repo update
         retry: 2
       - name: deploy-external-secrets
-        run: helm upgrade --install external-secrets external-secrets/external-secrets --namespace external-secrets --create-namespace --wait=true --timeout={{.timeout}}
+        run: helm upgrade --install external-secrets external-secrets/external-secrets --namespace external-secrets --create-namespace --wait=true 
         timeout: 10m
         onFailure: stop
       - name: deploy
-        run: helm upgrade --install {{.Component}} {{.chart}} --namespace {{.namespacePrefix}}{{.Component}} --create-namespace --wait=true --timeout={{.timeout}}
+        run: helm upgrade --install {{.Component}} {{.chart}} --namespace {{.namespacePrefix}}{{.Component}} --create-namespace --wait=true 
         timeout: 15m
         onFailure: stop
       - name: verify

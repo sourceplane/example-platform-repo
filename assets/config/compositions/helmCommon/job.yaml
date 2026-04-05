@@ -20,7 +20,7 @@ jobs:
         run: helm repo update
         retry: 2
       - name: deploy
-        run: helm upgrade --install {{.Component}} {{.chart}} --namespace platform-common --create-namespace --wait=true --timeout={{.timeout}}
+        run: helm upgrade --install {{.Component}} {{.chart}} --namespace platform-common --create-namespace --wait=true
         timeout: 15m
         onFailure: stop
       - name: verify
