@@ -25,7 +25,7 @@ jobs:
             --view dag 
           artifacts: plan.json
       - name: run plan
-        run: tinx -- lite-ci run --plan plan.json --job-id "common-services@production.deploy"
+        run: tinx -- lite-ci run -x --plan plan.json --job-id "common-services@production.deploy"
 
 
 
