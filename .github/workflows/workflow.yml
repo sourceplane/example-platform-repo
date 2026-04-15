@@ -19,6 +19,11 @@ jobs:
           path: .providers/src/torkflow
           fetch-depth: 1
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: .providers/src/torkflow/go.mod
+
       - name: Install tinx
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
 
