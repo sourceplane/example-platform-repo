@@ -1,0 +1,38 @@
+apiVersion: sourceplane.io/v1
+kind: JobRegistry
+metadata:
+  name: workspace-jobs
+  description: Workspace-backed provider smoke jobs
+jobs:
+  - name: verify-workspace
+    description: Verify workspace-installed provider tools with dry-run-safe commands
+    runsOn: ubuntu-22.04
+    timeout: 15m
+    retries: 0
+    labels:
+      scope: smoke
+    steps:
+      - name: kubectl-dry-run
+        run: kubectl version --client --output=yaml >/dev/null
+        onFailure: stop
+      - name: helm-template
+        run: helm template {{.Component}} {{.chartPath}} --values {{.valuesFile}} >/dev/null
+        onFailure: stop
+      - name: terraform-fmt-check
+        run: terraform fmt -check {{.terraformDir}}
+        onFailure: stop
+      - name: azure-cli-version
+        run: az version --output json >/dev/null
+        onFailure: stop
+      - name: kustomize-build
+        run: kustomize build {{.kustomizeDir}} >/dev/null
+        onFailure: stop
+      - name: torkflow-view
+        run: wtorkflow view --workflow {{.workflowFile}} >/dev/null
+        onFailure: stop
+    inputs:
+      chartPath: services/hello-app
+      valuesFile: services/hello-app/values.yaml
+      kustomizeDir: assets/fixtures/kustomize
+      terraformDir: assets/fixtures/terraform
+      workflowFile: assets/workflows/provider-smoke.yaml

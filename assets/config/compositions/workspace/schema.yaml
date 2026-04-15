@@ -1,0 +1,46 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Workspace Provider Smoke Component
+description: Schema for a workspace-backed provider smoke test component
+type: object
+required:
+  - name
+  - type
+  - inputs
+properties:
+  name:
+    type: string
+    description: Component name
+  type:
+    type: string
+    const: workspace
+    description: Component type identifier
+  inputs:
+    type: object
+    required:
+      - AZURE_CLI_VERSION
+      - chartPath
+      - valuesFile
+      - kustomizeDir
+      - terraformDir
+      - workflowFile
+    properties:
+      AZURE_CLI_VERSION:
+        type: string
+        description: Exact Azure CLI version pinned for deterministic provider setup
+      chartPath:
+        type: string
+        description: Local Helm chart path
+      valuesFile:
+        type: string
+        description: Values file passed to helm template
+      kustomizeDir:
+        type: string
+        description: Kustomize root used for render-only builds
+      terraformDir:
+        type: string
+        description: Terraform directory checked with terraform fmt
+      workflowFile:
+        type: string
+        description: Workflow file rendered by wtorkflow view
+    additionalProperties: false
+additionalProperties: true
