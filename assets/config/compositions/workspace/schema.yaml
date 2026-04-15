@@ -17,12 +17,16 @@ properties:
   inputs:
     type: object
     required:
+      - AZURE_CLI_VERSION
       - chartPath
       - valuesFile
       - kustomizeDir
       - terraformDir
       - workflowFile
     properties:
+      AZURE_CLI_VERSION:
+        type: string
+        description: Exact Azure CLI version pinned for deterministic provider setup
       chartPath:
         type: string
         description: Local Helm chart path

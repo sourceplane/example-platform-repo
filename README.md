@@ -19,4 +19,6 @@ The CI workflow initializes the workspace with `sourceplane/tinx-action@v2.1.1`,
 - `kustomize build`
 - `wtorkflow view`
 
+The smoke component pins `AZURE_CLI_VERSION=2.85.0` so the Azure CLI provider installs an exact release instead of resolving `latest` through the GitHub releases API.
+
 Before the workspace is initialized, CI checks out `sourceplane/torkflow` and packages its provider to `.providers/torkflow/oci` so the workspace can consume `wtorkflow` through a local OCI source. The workflow runs on `macos-latest` because the current Azure CLI setup provider publishes macOS binaries but not Linux ones.

@@ -23,6 +23,7 @@ components:
     path: .
     enabled: true
     inputs:
+      AZURE_CLI_VERSION: 2.85.0
       chartPath: services/hello-app
       valuesFile: services/hello-app/values.yaml
       kustomizeDir: assets/fixtures/kustomize
