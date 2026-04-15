@@ -6,26 +6,33 @@ on:
     branches: [ main ]
 
 jobs:
-  plan:
-    name: CI Plan
+  workspace-smoke:
+    name: Workspace Smoke
     runs-on: ubuntu-latest
-    outputs:
-      tinx_outputs: ${{ steps.tinx-plan.outputs.outputs-json }}
     steps:
       - uses: actions/checkout@v4
 
-      - id: tinx-plan
-        uses: sourceplane/tinx-action@v2
+      - id: workspace-plan
+        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
-          providers: |
-            sourceplane/lite-ci:v0.2.25 as lite-ci
+          workspace: tinx.yaml
           run: |
-            tinx -- lite-ci plan \
-            --config-dir assets/config/compositions \
-            --view dag 
+            lite-ci compositions workspace --config-dir assets/config/compositions
+            lite-ci validate --intent intent.yaml --config-dir assets/config/compositions
+            lite-ci plan \
+              --intent intent.yaml \
+              --config-dir assets/config/compositions \
+              --output plan.json \
+              --view dag
+          outputs: |
+            plan=plan.json
           artifacts: plan.json
-      - name: run plan
-        run: tinx -- lite-ci run -x --plan plan.json --job-id "common-services@production.deploy"
+      - name: Execute workspace smoke plan
+        run: |
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+            lite-ci run \
+            --execute \
+            --plan plan.json
 
 
 

@@ -1,0 +1,19 @@
+apiVersion: tinx.io/v1
+kind: Workspace
+metadata:
+  name: example-platform
+providers:
+  lite-ci:
+    source: sourceplane/lite-ci:v0.2.26
+  wtorkflow:
+    source: sourceplane/torkflow:v0.0.1
+  setup-kubectl:
+    source: sourceplane/tinx-setup-kubectl:v0.1.0
+  setup-helm:
+    source: sourceplane/tinx-setup-helm:v0.1.0
+  setup-terraform:
+    source: sourceplane/tinx-setup-terraform:v0.1.0
+  setup-az-cli:
+    source: sourceplane/tinx-setup-azure-cli:v0.1.0
+  setup-kustomize:
+    source: sourceplane/tinx-setup-kustomize:v0.1.0
