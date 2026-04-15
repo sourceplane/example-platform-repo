@@ -12,6 +12,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout torkflow provider source
+        uses: actions/checkout@v4
+        with:
+          repository: sourceplane/torkflow
+          path: .providers/src/torkflow
+          fetch-depth: 1
+
+      - name: Install tinx
+        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
+
+      - name: Build local wtorkflow provider
+        run: |
+          cd .providers/src/torkflow
+          tinx release \
+            --manifest provider.yaml \
+            --main ./cmd/torkflow \
+            --dist dist \
+            --output "$GITHUB_WORKSPACE/.providers/torkflow/oci" \
+            --tag ci
+
       - id: workspace-plan
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:

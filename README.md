@@ -7,7 +7,7 @@ This sample keeps the platform design intentionally small and provider-native.
 The workspace manifest in `tinx.yaml` provides:
 
 - `lite-ci` for intent compilation and execution
-- `wtorkflow` for workflow graph inspection
+- `wtorkflow` for workflow graph inspection, sourced from a local OCI layout built from `sourceplane/torkflow`
 - `kubectl`, `helm`, `terraform`, `az`, and `kustomize` through their setup providers
 
 The CI workflow initializes the workspace with `sourceplane/tinx-action@v2.1.1`, validates and plans with `lite-ci`, then executes the compiled plan. Each job step is dry-run safe:
@@ -18,3 +18,5 @@ The CI workflow initializes the workspace with `sourceplane/tinx-action@v2.1.1`,
 - `az version`
 - `kustomize build`
 - `wtorkflow view`
+
+Before the workspace is initialized, CI checks out `sourceplane/torkflow` and packages its provider to `.providers/torkflow/oci` so the workspace can consume `wtorkflow` through a local OCI source.

@@ -1,0 +1,5 @@
+.providers/
+.workspace/
+.liteci-state.json
+plan.json
+tinx.lock
