@@ -19,4 +19,4 @@ The CI workflow initializes the workspace with `sourceplane/tinx-action@v2.1.1`,
 - `kustomize build`
 - `wtorkflow view`
 
-Before the workspace is initialized, CI checks out `sourceplane/torkflow` and packages its provider to `.providers/torkflow/oci` so the workspace can consume `wtorkflow` through a local OCI source.
+Before the workspace is initialized, CI checks out `sourceplane/torkflow` and packages its provider to `.providers/torkflow/oci` so the workspace can consume `wtorkflow` through a local OCI source. The workflow runs on `macos-latest` because the current Azure CLI setup provider publishes macOS binaries but not Linux ones.
