@@ -17,7 +17,6 @@ properties:
   inputs:
     type: object
     required:
-      - AZURE_CLI_VERSION
       - chartPath
       - valuesFile
       - kustomizeDir

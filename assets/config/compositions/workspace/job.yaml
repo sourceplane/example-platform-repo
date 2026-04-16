@@ -13,22 +13,19 @@ jobs:
       scope: smoke
     steps:
       - name: kubectl-dry-run
-        run: kubectl version --client --output=yaml >/dev/null
+        run: kubectl version --client --output=yaml
         onFailure: stop
       - name: helm-template
-        run: helm template {{.Component}} {{.chartPath}} --values {{.valuesFile}} >/dev/null
+        run: helm template {{.Component}} {{.chartPath}} --values {{.valuesFile}}
         onFailure: stop
       - name: terraform-fmt-check
         run: terraform fmt -check {{.terraformDir}}
         onFailure: stop
-      - name: azure-cli-version
-        run: az version --output json >/dev/null
-        onFailure: stop
       - name: kustomize-build
-        run: kustomize build {{.kustomizeDir}} >/dev/null
+        run: kustomize build {{.kustomizeDir}}
         onFailure: stop
       - name: torkflow-view
-        run: wtorkflow view --workflow {{.workflowFile}} >/dev/null
+        run: torkflow view --workflow {{.workflowFile}}
         onFailure: stop
     inputs:
       chartPath: services/hello-app
