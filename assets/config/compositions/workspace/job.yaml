@@ -21,14 +21,11 @@ jobs:
       - name: terraform-fmt-check
         run: terraform fmt -check {{.terraformDir}}
         onFailure: stop
-      - name: azure-cli-version
-        run: az version --output json
-        onFailure: stop
       - name: kustomize-build
         run: kustomize build {{.kustomizeDir}}
         onFailure: stop
       - name: torkflow-view
-        run: wtorkflow view --workflow {{.workflowFile}}
+        run: torkflow view --workflow {{.workflowFile}}
         onFailure: stop
     inputs:
       chartPath: services/hello-app
