@@ -26,23 +26,11 @@ jobs:
 
       - name: Install tinx
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.0
 
-      - name: Build local wtorkflow provider
-        run: |
-          cd .providers/src/torkflow
-          tinx release \
-            --manifest provider.yaml \
-            --main ./cmd/torkflow \
-            --dist dist \
-            --output "$GITHUB_WORKSPACE/.providers/torkflow/oci" \
-            --tag ci
 
       - id: workspace-plan
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
-          version: v0.4.0
           workspace: tinx.yaml
           run: |
             lite-ci compositions workspace --config-dir assets/config/compositions
