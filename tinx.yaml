@@ -6,7 +6,7 @@ providers:
   lite-ci:
     source: sourceplane/lite-ci:v0.2.26
   wtorkflow:
-    source: .providers/torkflow/oci
+    source: sourceplane/torkflow:v0.0.1
   setup-kubectl:
     source: sourceplane/tinx-setup-kubectl:v0.1.0
   setup-helm:
