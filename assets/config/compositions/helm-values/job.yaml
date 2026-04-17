@@ -1,0 +1,23 @@
+apiVersion: sourceplane.io/v1
+kind: JobRegistry
+metadata:
+  name: helm-values-jobs
+  description: Helm values validation jobs for deployment files
+jobs:
+  - name: render-helm-values
+    description: Validate values files against their paired chart directories
+    runsOn: ubuntu-22.04
+    timeout: 20m
+    retries: 0
+    labels:
+      scope: delivery
+    steps:
+      - name: helm-values-context
+        run: echo "Validating {{.valuesFile}} against {{.chartPath}}"
+        onFailure: stop
+      - name: helm-values-lint
+        run: helm lint {{.chartPath}} --values {{.valuesFile}}
+        onFailure: stop
+      - name: helm-values-template
+        run: helm template {{.releaseName}} {{.chartPath}} --values {{.valuesFile}}
+        onFailure: stop

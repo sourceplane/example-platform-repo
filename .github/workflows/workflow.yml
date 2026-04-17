@@ -36,7 +36,7 @@ jobs:
           version: v0.4.1
           workspace: tinx.yaml
           run: |
-            lite-ci compositions workspace --config-dir assets/config/compositions
+            lite-ci compositions list --config-dir assets/config/compositions
             lite-ci validate --intent intent.yaml --config-dir assets/config/compositions
             lite-ci plan \
               --intent intent.yaml \
