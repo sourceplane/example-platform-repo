@@ -40,6 +40,6 @@ properties:
         description: Terraform directory checked with terraform fmt
       workflowFile:
         type: string
-        description: Workflow file rendered by wtorkflow view
+        description: Workflow file rendered by torkflow view
     additionalProperties: false
 additionalProperties: true

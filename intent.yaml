@@ -2,33 +2,146 @@ apiVersion: sourceplane.io/v1
 kind: Intent
 
 metadata:
-  name: workspace-provider-smoke
-  description: Provider-native DevOps smoke flow compiled by lite-ci and executed through tinx
+  name: multi-environment-platform
+  description: Multi-environment DevOps sample for foundation, identity, and commerce domains
   namespace: default
 
 environments:
   development:
     selectors:
       components:
-        - workspace-provider-smoke
+        - network-foundation
+        - cluster-addons
+        - identity-portal-values
+        - commerce-checkout-values
+        - identity-portal-chart
+        - commerce-checkout-chart
     defaults:
       lane: dry-run
-      namespacePrefix: smoke-
+      namespacePrefix: dev-
     policies:
       requireApproval: "false"
 
+  staging:
+    selectors:
+      components:
+        - network-foundation
+        - cluster-addons
+        - identity-portal-values
+        - identity-portal-chart
+    defaults:
+      lane: verify
+      namespacePrefix: stg-
+    policies:
+      requireApproval: "true"
+
+  production:
+    selectors:
+      components:
+        - network-foundation
+        - cluster-addons
+        - commerce-checkout-values
+        - commerce-checkout-chart
+    defaults:
+      lane: release
+      namespacePrefix: prod-
+    policies:
+      requireApproval: "true"
+
 components:
-  - name: workspace-provider-smoke
-    type: workspace
-    path: .
+  - name: network-foundation
+    type: terraform
+    domain: platform-foundation
+    path: infra/infra-1
     enabled: true
     inputs:
-      chartPath: services/hello-app
-      valuesFile: services/hello-app/values.yaml
-      kustomizeDir: assets/fixtures/kustomize
-      terraformDir: assets/fixtures/terraform
-      workflowFile: assets/workflows/provider-smoke.yaml
+      stackName: network-foundation
+      terraformDir: .
     labels:
       team: platform
-      philosophy: devops-as-a-provider
+      layer: foundation
+      stack: network
     dependsOn: []
+
+  - name: cluster-addons
+    type: terraform
+    domain: platform-foundation
+    path: infra/infra-2
+    enabled: true
+    inputs:
+      stackName: cluster-addons
+      terraformDir: .
+    labels:
+      team: platform
+      layer: foundation
+      stack: cluster
+    dependsOn:
+      - component: network-foundation
+
+  - name: identity-portal-values
+    type: helm-values
+    domain: customer-identity
+    path: deploy/hello-deploy
+    enabled: true
+    inputs:
+      chartPath: ../../charts/hello-chart/chart
+      valuesFile: values.yaml
+      releaseName: identity-portal
+    labels:
+      team: platform
+      layer: delivery
+      domain: identity
+      release: identity-portal
+    dependsOn:
+      - component: network-foundation
+
+  - name: commerce-checkout-values
+    type: helm-values
+    domain: commerce-checkout
+    path: deploy/deploy-service2
+    enabled: true
+    inputs:
+      chartPath: ../../charts/chart-2/chart
+      valuesFile: values.yaml
+      releaseName: commerce-checkout
+    labels:
+      team: platform
+      layer: delivery
+      domain: commerce
+      release: commerce-checkout
+    dependsOn:
+      - component: cluster-addons
+
+  - name: identity-portal-chart
+    type: helm-chart
+    domain: customer-identity
+    path: charts/hello-chart/chart
+    enabled: true
+    inputs:
+      chartPath: .
+      valuesFile: ../../../deploy/hello-deploy/values.yaml
+      releaseName: identity-portal
+    labels:
+      team: platform
+      layer: delivery
+      domain: identity
+      release: identity-portal
+    dependsOn:
+      - component: identity-portal-values
+
+  - name: commerce-checkout-chart
+    type: helm-chart
+    domain: commerce-checkout
+    path: charts/chart-2/chart
+    enabled: true
+    inputs:
+      chartPath: .
+      valuesFile: ../../../deploy/deploy-service2/values.yaml
+      releaseName: commerce-checkout
+    labels:
+      team: platform
+      layer: delivery
+      domain: commerce
+      release: commerce-checkout
+    dependsOn:
+      - component: commerce-checkout-values

@@ -1,0 +1,23 @@
+apiVersion: sourceplane.io/v1
+kind: JobRegistry
+metadata:
+  name: helm-chart-jobs
+  description: Helm chart validation jobs for chart components
+jobs:
+  - name: render-helm-chart
+    description: Lint and template Helm charts against their paired values files
+    runsOn: ubuntu-22.04
+    timeout: 20m
+    retries: 0
+    labels:
+      scope: delivery
+    steps:
+      - name: helm-chart-context
+        run: echo "Rendering {{.releaseName}} from {{.chartPath}} with {{.valuesFile}}"
+        onFailure: stop
+      - name: helm-chart-lint
+        run: helm lint {{.chartPath}} --values {{.valuesFile}}
+        onFailure: stop
+      - name: helm-chart-template
+        run: helm template {{.releaseName}} {{.chartPath}} --values {{.valuesFile}}
+        onFailure: stop
