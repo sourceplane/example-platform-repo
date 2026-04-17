@@ -36,6 +36,7 @@ jobs:
           version: v0.4.1
           workspace: tinx.yaml
           run: |
+            rm -f .liteci-state.json plan.json
             lite-ci compositions list --config-dir assets/config/compositions
             lite-ci validate --intent intent.yaml --config-dir assets/config/compositions
             lite-ci plan \
@@ -45,7 +46,9 @@ jobs:
               --view dag
           outputs: |
             plan=plan.json
-          artifacts: plan.json
+          artifacts: |
+            plan.json
+            .liteci/component-tree.yaml
       - name: Execute workspace smoke plan
         run: |
           tinx --workspace "$TINX_WORKSPACE_ROOT" -- \

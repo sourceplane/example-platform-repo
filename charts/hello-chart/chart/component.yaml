@@ -1,0 +1,24 @@
+apiVersion: sourceplane.io/v1
+kind: Component
+
+metadata:
+  name: identity-portal-chart
+
+spec:
+  type: helm-chart
+  domain: customer-identity
+  subscribe:
+    environments:
+      - development
+      - staging
+  inputs:
+    chartPath: .
+    valuesFile: ../../../deploy/hello-deploy/values.yaml
+    releaseName: identity-portal
+  labels:
+    team: platform
+    layer: delivery
+    domain: identity
+    release: identity-portal
+  dependsOn:
+    - component: identity-portal-values
