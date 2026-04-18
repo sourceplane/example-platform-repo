@@ -26,6 +26,9 @@ properties:
       terraformDir:
         type: string
         description: Terraform root directory used by the job
+      terraformVersion:
+        type: string
+        description: Optional Terraform version installed by the job registry
       varFile:
         type: string
         description: Optional tfvars file for future expansion

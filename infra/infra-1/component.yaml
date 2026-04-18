@@ -15,6 +15,7 @@ spec:
   inputs:
     stackName: network-foundation
     terraformDir: .
+    terraformVersion: 1.9.8
   labels:
     team: platform
     layer: foundation

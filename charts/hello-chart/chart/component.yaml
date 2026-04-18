@@ -15,6 +15,7 @@ spec:
     chartPath: .
     valuesFile: ../../../deploy/hello-deploy/values.yaml
     releaseName: identity-portal
+    helmVersion: v3.15.4
   labels:
     team: platform
     layer: delivery

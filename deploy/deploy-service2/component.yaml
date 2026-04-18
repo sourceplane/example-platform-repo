@@ -15,6 +15,7 @@ spec:
     chartPath: ../../charts/chart-2/chart
     valuesFile: values.yaml
     releaseName: commerce-checkout
+    helmVersion: v3.15.4
   labels:
     team: platform
     layer: delivery

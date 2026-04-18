@@ -30,5 +30,8 @@ properties:
       releaseName:
         type: string
         description: Helm release name used during template rendering
+      helmVersion:
+        type: string
+        description: Optional Helm version installed by the job registry
     additionalProperties: false
 additionalProperties: true

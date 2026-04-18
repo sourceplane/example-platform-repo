@@ -2,5 +2,8 @@
 .workspace/
 .liteci/
 .liteci-state.json
+.arx/
+.arx-state.json
+.artifacts/
 plan.json
 tinx.lock

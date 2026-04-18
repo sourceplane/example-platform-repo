@@ -12,8 +12,17 @@ jobs:
     labels:
       scope: infra
     steps:
+      - id: setup-terraform
+        name: setup-terraform
+        use: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "{{.terraformVersion}}"
+          terraform_wrapper: "false"
       - name: terraform-context
-        run: echo "Validating {{.stackName}} at {{.terraformDir}}"
+        shell: bash
+        run: |
+          terraform version
+          echo "Validating {{.stackName}} at {{.terraformDir}}"
         onFailure: stop
       - name: terraform-fmt-check
         run: terraform fmt -check {{.terraformDir}}

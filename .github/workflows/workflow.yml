@@ -5,56 +5,91 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
-  workspace-smoke:
-    name: Workspace Smoke
-    runs-on: macos-latest
+  review-plan:
+    name: Review Plan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Checkout torkflow provider source
-        uses: actions/checkout@v4
         with:
-          repository: sourceplane/torkflow
-          path: .providers/src/torkflow
-          fetch-depth: 1
+          fetch-depth: 0
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: .providers/src/torkflow/go.mod
-
-      - name: Install tinx
-        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.1
-
-
-      - id: workspace-plan
+      - name: Compile review-scoped plan
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
           workspace: tinx.yaml
+          artifact-name: arx-review-artifacts
           run: |
-            rm -f .liteci-state.json plan.json
-            lite-ci compositions list --config-dir assets/config/compositions
-            lite-ci validate --intent intent.yaml --config-dir assets/config/compositions
-            lite-ci plan \
-              --intent intent.yaml \
-              --config-dir assets/config/compositions \
-              --output plan.json \
-              --view dag
-          outputs: |
-            plan=plan.json
+            set -euo pipefail
+            repo_root="$GITHUB_WORKSPACE"
+            base_ref="${{ github.event.pull_request.base.ref }}"
+            git fetch --no-tags --prune --depth=1 origin "$base_ref"
+            changed_files="$(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD" | paste -sd, -)"
+            if [[ -z "$changed_files" ]]; then
+              changed_files="intent.yaml"
+            fi
+
+            printf 'Changed files: %s\n' "$changed_files"
+            mkdir -p "$repo_root/.artifacts"
+            rm -rf "$repo_root/.arx" "$repo_root/.artifacts/pr-plan.json"
+
+            arx compositions --config-dir "$repo_root/assets/config/compositions"
+            arx component \
+              --intent "$repo_root/intent.yaml" \
+              --config-dir "$repo_root/assets/config/compositions" \
+              --files "$changed_files" \
+              --long
+            arx plan \
+              --intent "$repo_root/intent.yaml" \
+              --config-dir "$repo_root/assets/config/compositions" \
+              --files "$changed_files" \
+              --output "$repo_root/.artifacts/pr-plan.json" \
+              --view dependencies
+            test -s "$repo_root/.artifacts/pr-plan.json"
           artifacts: |
-            plan.json
-            .liteci/component-tree.yaml
-      - name: Execute workspace smoke plan
-        run: |
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
-            lite-ci run \
-            --execute \
-            --plan plan.json
+            .artifacts/pr-plan.json
+            .arx/component-tree.yaml
+
+  platform-smoke:
+    name: Full Platform Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate, plan, and execute with arx
+        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
+        with:
+          version: v0.4.1
+          workspace: tinx.yaml
+          artifact-name: arx-platform-artifacts
+          run: |
+            set -euo pipefail
+            repo_root="$GITHUB_WORKSPACE"
+            mkdir -p "$repo_root/.artifacts"
+            rm -rf "$repo_root/.arx" "$repo_root/.arx-state.json" "$repo_root/.artifacts/plan.json"
+
+            arx compositions --config-dir "$repo_root/assets/config/compositions"
+            arx validate \
+              --intent "$repo_root/intent.yaml" \
+              --config-dir "$repo_root/assets/config/compositions"
+            arx plan \
+              --intent "$repo_root/intent.yaml" \
+              --config-dir "$repo_root/assets/config/compositions" \
+              --output "$repo_root/.artifacts/plan.json" \
+              --view dag
+            arx run \
+              --plan "$repo_root/.artifacts/plan.json" \
+              --execute \
+              --gha
+          artifacts: |
+            .artifacts/plan.json
+            .arx/component-tree.yaml
+            .arx-state.json
 
 
 
