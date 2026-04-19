@@ -18,42 +18,56 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compile review-scoped plan
+      - name: Resolve review scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_ref="${{ github.event.pull_request.base.ref }}"
+          git fetch --no-tags --prune --depth=1 origin "$base_ref"
+          changed_files="$(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD" | paste -sd, -)"
+          if [[ -z "$changed_files" ]]; then
+            changed_files="intent.yaml"
+          fi
+
+          printf 'CHANGED_FILES=%s\n' "$changed_files" >> "$GITHUB_ENV"
+          mkdir -p .artifacts
+          rm -rf .arx .artifacts/pr-plan.json
+
+      - name: Initialize arx workspace
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
           workspace: tinx.yaml
-          artifact-name: arx-review-artifacts
-          run: |
-            set -euo pipefail
-            repo_root="$GITHUB_WORKSPACE"
-            base_ref="${{ github.event.pull_request.base.ref }}"
-            git fetch --no-tags --prune --depth=1 origin "$base_ref"
-            changed_files="$(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD" | paste -sd, -)"
-            if [[ -z "$changed_files" ]]; then
-              changed_files="intent.yaml"
-            fi
 
-            printf 'Changed files: %s\n' "$changed_files"
-            mkdir -p "$repo_root/.artifacts"
-            rm -rf "$repo_root/.arx" "$repo_root/.artifacts/pr-plan.json"
+      - name: List compositions
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+            arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
-            arx compositions --config-dir "$repo_root/assets/config/compositions"
+      - name: Review changed components
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
             arx component \
-              --intent "$repo_root/intent.yaml" \
-              --config-dir "$repo_root/assets/config/compositions" \
-              --files "$changed_files" \
+              --intent "$GITHUB_WORKSPACE/intent.yaml" \
+              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
+              --files "$CHANGED_FILES" \
               --long
+
+      - name: Compile review-scoped plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
             arx plan \
-              --intent "$repo_root/intent.yaml" \
-              --config-dir "$repo_root/assets/config/compositions" \
-              --files "$changed_files" \
-              --output "$repo_root/.artifacts/pr-plan.json" \
+              --intent "$GITHUB_WORKSPACE/intent.yaml" \
+              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
+              --files "$CHANGED_FILES" \
+              --output "$GITHUB_WORKSPACE/.artifacts/pr-plan.json" \
               --view dependencies
-            test -s "$repo_root/.artifacts/pr-plan.json"
-          artifacts: |
-            .artifacts/pr-plan.json
-            .arx/component-tree.yaml
 
   platform-smoke:
     name: Full Platform Smoke
@@ -61,35 +75,55 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate, plan, and execute with arx
+      - name: Prepare workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts
+          rm -rf .arx .arx-state.json .artifacts/plan.json
+
+      - name: Initialize arx workspace
         uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
           workspace: tinx.yaml
-          artifact-name: arx-platform-artifacts
-          run: |
-            set -euo pipefail
-            repo_root="$GITHUB_WORKSPACE"
-            mkdir -p "$repo_root/.artifacts"
-            rm -rf "$repo_root/.arx" "$repo_root/.arx-state.json" "$repo_root/.artifacts/plan.json"
 
-            arx compositions --config-dir "$repo_root/assets/config/compositions"
+      - name: List compositions
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+            arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+
+      - name: Validate intent
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
             arx validate \
-              --intent "$repo_root/intent.yaml" \
-              --config-dir "$repo_root/assets/config/compositions"
+              --intent "$GITHUB_WORKSPACE/intent.yaml" \
+              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+
+      - name: Compile full plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
             arx plan \
-              --intent "$repo_root/intent.yaml" \
-              --config-dir "$repo_root/assets/config/compositions" \
-              --output "$repo_root/.artifacts/plan.json" \
+              --intent "$GITHUB_WORKSPACE/intent.yaml" \
+              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
+              --output "$GITHUB_WORKSPACE/.artifacts/plan.json" \
               --view dag
+
+      - name: Execute full plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
             arx run \
-              --plan "$repo_root/.artifacts/plan.json" \
+              --plan "$GITHUB_WORKSPACE/.artifacts/plan.json" \
               --execute \
               --gha
-          artifacts: |
-            .artifacts/plan.json
-            .arx/component-tree.yaml
-            .arx-state.json
 
 
 
