@@ -4,4 +4,4 @@ metadata:
     name: example-platform
 providers:
     arx:
-        source: ghcr.io/sourceplane/arx:v0.7.0
+        source: ghcr.io/sourceplane/arx:v0.8.0
