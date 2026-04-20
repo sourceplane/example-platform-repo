@@ -34,23 +34,23 @@ jobs:
           rm -rf .arx .artifacts/pr-plan.json
 
       - name: Initialize arx workspace
-        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
+        uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
-          workspace: tinx.yaml
+          workspace: kiox.yaml
 
       - name: List compositions
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
       - name: Review changed components
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx component \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx plan \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
@@ -83,23 +83,23 @@ jobs:
           rm -rf .arx .arx-state.json .artifacts/plan.json
 
       - name: Initialize arx workspace
-        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
+        uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
-          workspace: tinx.yaml
+          workspace: kiox.yaml
 
       - name: List compositions
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
       - name: Validate intent
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx validate \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
@@ -108,7 +108,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx plan \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
@@ -119,7 +119,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
+          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
             arx run \
               --plan "$GITHUB_WORKSPACE/.artifacts/plan.json" \
               --execute \
