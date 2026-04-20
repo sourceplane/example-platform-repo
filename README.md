@@ -21,7 +21,7 @@ Each composition has its own job registry under `assets/config/compositions`:
 
 `intent.yaml` declares discovery roots for `infra/`, `deploy/`, and `charts/`. The discovered manifests use `spec.subscribe.environments` so the sample does not duplicate environment membership in inline component lists. Because manifests live beside the code they own, arx infers the working directory automatically when `spec.path` is omitted.
 
-The workspace manifest in `tinx.yaml` now pins only `ghcr.io/sourceplane/arx:v0.7.0`. The tool setup logic moved into the job registries themselves, which keeps the workspace surface small and the CI runner portable.
+The workspace manifest in `kiox.yaml` now pins only `ghcr.io/sourceplane/arx:v0.7.0`. The tool setup logic moved into the job registries themselves, which keeps the workspace surface small and the CI runner portable.
 
 The CI workflow has two lanes:
 
