@@ -12,8 +12,16 @@ jobs:
     labels:
       scope: delivery
     steps:
+      - id: setup-helm
+        name: setup-helm
+        use: azure/setup-helm@v4.3.0
+        with:
+          version: "{{.helmVersion}}"
       - name: helm-chart-context
-        run: echo "Rendering {{.releaseName}} from {{.chartPath}} with {{.valuesFile}}"
+        shell: bash
+        run: |
+          helm version --short
+          echo "Rendering {{.releaseName}} from {{.chartPath}} with {{.valuesFile}}"
         onFailure: stop
       - name: helm-chart-lint
         run: helm lint {{.chartPath}} --values {{.valuesFile}}

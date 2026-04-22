@@ -2,5 +2,8 @@
 .workspace/
 .liteci/
 .liteci-state.json
+.gluon/
+.gluon-state.json
+.artifacts/
 plan.json
-tinx.lock
+kiox.lock

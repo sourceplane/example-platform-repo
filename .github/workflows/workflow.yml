@@ -5,56 +5,45 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
-  workspace-smoke:
-    name: Workspace Smoke
-    runs-on: macos-latest
+  review-plan:
+    name: Review Plan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize gluon workspace
+        uses: sourceplane/kiox-action@v2.1.2
+
+      - name: Compile review-scoped plan
+        run: |
+          kiox -- \
+            gluon plan \
+              --config-dir "assets/config/compositions" \
+              --view dependencies
+
+  platform-smoke:
+    name: Full Platform Smoke
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout torkflow provider source
-        uses: actions/checkout@v4
-        with:
-          repository: sourceplane/torkflow
-          path: .providers/src/torkflow
-          fetch-depth: 1
+      - name: Initialize gluon workspace
+        uses: sourceplane/kiox-action@v2.1.2
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: .providers/src/torkflow/go.mod
-
-      - name: Install tinx
-        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.1
-
-
-      - id: workspace-plan
-        uses: sourceplane/tinx-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.1
-          workspace: tinx.yaml
-          run: |
-            rm -f .liteci-state.json plan.json
-            lite-ci compositions list --config-dir assets/config/compositions
-            lite-ci validate --intent intent.yaml --config-dir assets/config/compositions
-            lite-ci plan \
-              --intent intent.yaml \
-              --config-dir assets/config/compositions \
-              --output plan.json \
-              --view dag
-          outputs: |
-            plan=plan.json
-          artifacts: |
-            plan.json
-            .liteci/component-tree.yaml
-      - name: Execute workspace smoke plan
+      - name: Compile full plan
         run: |
-          tinx --workspace "$TINX_WORKSPACE_ROOT" -- \
-            lite-ci run \
-            --execute \
-            --plan plan.json
+          kiox -- gluon plan --config-dir "assets/config/compositions" --view dag
+
+      - name: Execute full plan
+        run: |
+          kiox -- gluon run --execute --gha
 
 
 

@@ -1,0 +1,7 @@
+apiVersion: kiox.io/v1
+kind: Workspace
+metadata:
+    name: example-platform
+providers:
+    gluon:
+        source: ghcr.io/sourceplane/gluon:v0.9.0
