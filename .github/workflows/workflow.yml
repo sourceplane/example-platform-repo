@@ -31,9 +31,9 @@ jobs:
 
           printf 'CHANGED_FILES=%s\n' "$changed_files" >> "$GITHUB_ENV"
           mkdir -p .artifacts
-          rm -rf .arx .artifacts/pr-plan.json
+          rm -rf .gluon .artifacts/pr-plan.json
 
-      - name: Initialize arx workspace
+      - name: Initialize gluon workspace
         uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
@@ -44,14 +44,14 @@ jobs:
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+            gluon compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
       - name: Review changed components
         shell: bash
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx component \
+            gluon component \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
               --files "$CHANGED_FILES" \
@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx plan \
+            gluon plan \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
               --files "$CHANGED_FILES" \
@@ -80,9 +80,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .artifacts
-          rm -rf .arx .arx-state.json .artifacts/plan.json
+          rm -rf .gluon .gluon-state.json .artifacts/plan.json
 
-      - name: Initialize arx workspace
+      - name: Initialize gluon workspace
         uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
         with:
           version: v0.4.1
@@ -93,14 +93,14 @@ jobs:
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+            gluon compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
       - name: Validate intent
         shell: bash
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx validate \
+            gluon validate \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
 
@@ -109,7 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx plan \
+            gluon plan \
               --intent "$GITHUB_WORKSPACE/intent.yaml" \
               --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
               --output "$GITHUB_WORKSPACE/.artifacts/plan.json" \
@@ -120,7 +120,7 @@ jobs:
         run: |
           set -euo pipefail
           kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            arx run \
+            gluon run \
               --plan "$GITHUB_WORKSPACE/.artifacts/plan.json" \
               --execute \
               --gha
