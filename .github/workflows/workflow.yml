@@ -21,30 +21,11 @@ jobs:
       - name: Initialize gluon workspace
         uses: sourceplane/kiox-action@v2.1.2
 
-      - name: List compositions
-        shell: bash
-        run: |
-          set -euo pipefail
-          kiox -- \
-            gluon compositions --config-dir "assets/config/compositions"
-
-      - name: Review changed components
-        shell: bash
-        run: |
-          set -euo pipefail
-          kiox -- \
-            gluon component \
-              --config-dir "assets/config/compositions" \
-              --long
-
       - name: Compile review-scoped plan
-        shell: bash
         run: |
-          set -euo pipefail
           kiox -- \
             gluon plan \
               --config-dir "assets/config/compositions" \
-              --output ".artifacts/pr-plan.json" \
               --view dependencies
 
   platform-smoke:
@@ -53,51 +34,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare workspace
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .artifacts
-          rm -rf .gluon .gluon-state.json .artifacts/plan.json
-
       - name: Initialize gluon workspace
         uses: sourceplane/kiox-action@v2.1.2
 
-
-      - name: List compositions
-        shell: bash
-        run: |
-          set -euo pipefail
-          kiox -- \
-            gluon compositions --config-dir "assets/config/compositions"
-
-      - name: Validate intent
-        shell: bash
-        run: |
-          set -euo pipefail
-          kiox -- \
-            gluon validate \
-              --config-dir "assets/config/compositions"
-
       - name: Compile full plan
-        shell: bash
         run: |
-          set -euo pipefail
-          kiox -- \
-            gluon plan \
-              --config-dir "assets/config/compositions" \
-              --output ".artifacts/plan.json" \
-              --view dag
+          kiox -- gluon plan --config-dir "assets/config/compositions" --view dag
 
       - name: Execute full plan
-        shell: bash
         run: |
-          set -euo pipefail
-          kiox -- \
-            gluon run \
-              --plan ".artifacts/plan.json" \
-              --execute \
-              --gha
+          kiox -- gluon run --execute --gha
 
 
 
