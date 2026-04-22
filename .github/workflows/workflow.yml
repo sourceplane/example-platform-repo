@@ -25,7 +25,7 @@ jobs:
         run: |
           kiox -- \
             gluon plan \
-              --config-dir "assets/config/compositions" \
+              --intent intent.yaml \
               --view dependencies
 
   platform-smoke:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Compile full plan
         run: |
-          kiox -- gluon plan --config-dir "assets/config/compositions" --view dag
+          kiox -- gluon plan --intent intent.yaml --view dag
 
       - name: Execute full plan
         run: |

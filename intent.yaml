@@ -6,6 +6,12 @@ metadata:
   description: Multi-environment DevOps sample for foundation, identity, and commerce domains
   namespace: default
 
+compositions:
+  sources:
+    - name: example-platform
+      kind: dir
+      path: ./assets/config/compositions
+
 discovery:
   roots:
     - infra/
