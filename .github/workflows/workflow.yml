@@ -18,21 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve review scope
-        shell: bash
-        run: |
-          set -euo pipefail
-          base_ref="${{ github.event.pull_request.base.ref }}"
-          git fetch --no-tags --prune --depth=1 origin "$base_ref"
-          changed_files="$(git diff --name-only --diff-filter=ACMR "origin/$base_ref...HEAD" | paste -sd, -)"
-          if [[ -z "$changed_files" ]]; then
-            changed_files="intent.yaml"
-          fi
-
-          printf 'CHANGED_FILES=%s\n' "$changed_files" >> "$GITHUB_ENV"
-          mkdir -p .artifacts
-          rm -rf .gluon .artifacts/pr-plan.json
-
       - name: Initialize gluon workspace
         uses: sourceplane/kiox-action@v2.1.2
 
@@ -40,30 +25,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            gluon compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+          kiox -- \
+            gluon compositions --config-dir "assets/config/compositions"
 
       - name: Review changed components
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
+          kiox -- \
             gluon component \
-              --intent "$GITHUB_WORKSPACE/intent.yaml" \
-              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
-              --files "$CHANGED_FILES" \
+              --config-dir "assets/config/compositions" \
               --long
 
       - name: Compile review-scoped plan
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
+          kiox -- \
             gluon plan \
-              --intent "$GITHUB_WORKSPACE/intent.yaml" \
-              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
-              --files "$CHANGED_FILES" \
-              --output "$GITHUB_WORKSPACE/.artifacts/pr-plan.json" \
+              --config-dir "assets/config/compositions" \
+              --output ".artifacts/pr-plan.json" \
               --view dependencies
 
   platform-smoke:
@@ -87,36 +68,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
-            gluon compositions --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+          kiox -- \
+            gluon compositions --config-dir "assets/config/compositions"
 
       - name: Validate intent
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
+          kiox -- \
             gluon validate \
-              --intent "$GITHUB_WORKSPACE/intent.yaml" \
-              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions"
+              --config-dir "assets/config/compositions"
 
       - name: Compile full plan
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
+          kiox -- \
             gluon plan \
-              --intent "$GITHUB_WORKSPACE/intent.yaml" \
-              --config-dir "$GITHUB_WORKSPACE/assets/config/compositions" \
-              --output "$GITHUB_WORKSPACE/.artifacts/plan.json" \
+              --config-dir "assets/config/compositions" \
+              --output ".artifacts/plan.json" \
               --view dag
 
       - name: Execute full plan
         shell: bash
         run: |
           set -euo pipefail
-          kiox --workspace "$KIOX_WORKSPACE_ROOT" -- \
+          kiox -- \
             gluon run \
-              --plan "$GITHUB_WORKSPACE/.artifacts/plan.json" \
+              --plan ".artifacts/plan.json" \
               --execute \
               --gha
 
