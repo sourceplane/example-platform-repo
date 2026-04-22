@@ -23,10 +23,7 @@ jobs:
 
       - name: Compile review-scoped plan
         run: |
-          kiox -- \
-            gluon plan \
-              --config-dir "assets/config/compositions" \
-              --view dependencies
+          kiox -- gluon plan
 
   platform-smoke:
     name: Full Platform Smoke
@@ -39,7 +36,7 @@ jobs:
 
       - name: Compile full plan
         run: |
-          kiox -- gluon plan --config-dir "assets/config/compositions" --view dag
+          kiox -- gluon plan --view dag
 
       - name: Execute full plan
         run: |
