@@ -34,10 +34,7 @@ jobs:
           rm -rf .gluon .artifacts/pr-plan.json
 
       - name: Initialize gluon workspace
-        uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.1
-          workspace: kiox.yaml
+        uses: sourceplane/kiox-action@v2.1.2
 
       - name: List compositions
         shell: bash
@@ -83,10 +80,8 @@ jobs:
           rm -rf .gluon .gluon-state.json .artifacts/plan.json
 
       - name: Initialize gluon workspace
-        uses: sourceplane/kiox-action@813d00a458c74b54cb12ee80eca34deeb89dcc0b
-        with:
-          version: v0.4.1
-          workspace: kiox.yaml
+        uses: sourceplane/kiox-action@v2.1.2
+
 
       - name: List compositions
         shell: bash
