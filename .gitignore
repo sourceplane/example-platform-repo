@@ -7,3 +7,8 @@
 .artifacts/
 plan.json
 kiox.lock
+.terraform/
+website/.docusaurus/
+website/.wrangler/
+website/docs-build/
+website/node_modules/

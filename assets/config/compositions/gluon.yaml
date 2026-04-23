@@ -14,5 +14,9 @@ spec:
       path: helm-values/job.yaml
     - composition: helm-chart
       path: helm-chart/job.yaml
+    - composition: cloudflare-pages
+      path: cloudflare-pages/job.yaml
+    - composition: cloudflare-pages-terraform
+      path: cloudflare-pages-terraform/job.yaml
     - composition: workspace
       path: workspace/job.yaml
