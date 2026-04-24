@@ -11,7 +11,7 @@ spec:
     environments:
       - production
   inputs:
-    siteDir: ../../website
+    siteDir: .
     installCommand: npm ci
     buildCommand: npm run docs:build
     outputDir: docs-build

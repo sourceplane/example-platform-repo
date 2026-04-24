@@ -12,9 +12,11 @@ The repo layout splits the sample into dedicated areas:
 - `infra/*` for Terraform stacks
 - `deploy/*` directories that carry Helm values components and values files
 - `charts/*/chart` for Helm chart components
-- `website/` for the Docusaurus docs site used by the Cloudflare Pages examples
+- `schemas/` for intent and job schema definitions
+- `compositions/` for packaged Gluon compositions
+- `website/` for the Docusaurus docs site and its direct-upload component
 
-`intent.yaml` declares `assets/config/compositions` as a local composition package source. That package exports one composition per component type:
+`intent.yaml` declares `compositions` as a local composition package source. That package exports one composition per component type:
 
 - `terraform` installs Terraform through `hashicorp/setup-terraform` before running `fmt`, `init`, and `validate`
 - `helm-values` installs Helm through `azure/setup-helm` before linting and templating the paired chart path
@@ -22,7 +24,7 @@ The repo layout splits the sample into dedicated areas:
 - `cloudflare-pages` installs Node.js, builds the site, and direct-uploads static assets to Cloudflare Pages with Wrangler when running from `main`
 - `cloudflare-pages-terraform` installs Node.js and Terraform, verifies the same site locally, then reconciles a Git-backed Cloudflare Pages project through `cloudflare_pages_project`
 
-`intent.yaml` declares discovery roots for `infra/`, `deploy/`, and `charts/`. The discovered manifests use `spec.subscribe.environments` so the sample does not duplicate environment membership in inline component lists. Because manifests live beside the code they own, gluon infers the working directory automatically when `spec.path` is omitted.
+`intent.yaml` declares discovery roots for `infra/`, `deploy/`, `charts/`, and `website/`. The discovered manifests use `spec.subscribe.environments` so the sample does not duplicate environment membership in inline component lists. Because manifests live beside the code they own, gluon infers the working directory automatically when `spec.path` is omitted.
 
 The workspace manifest in `kiox.yaml` now pins `ghcr.io/sourceplane/gluon:v0.9.2`. The tool setup logic moved into the composition jobs themselves, which keeps the workspace surface small and the CI runner portable.
 
@@ -35,7 +37,7 @@ That split gives reviewers a focused planning view without sacrificing a full de
 
 The Cloudflare Pages example module is split in two:
 
-- `deploy/cloudflare-pages-wrangler/` exercises direct upload with a built artifact from `website/`
+- `website/` exercises direct upload with the docs site build and keeps the component manifest beside the site
 - `infra/cloudflare-pages-terraform/` manages a Git-connected Pages project that builds the same site inside Cloudflare
 
 To run the sample locally with `gluon` on your `PATH`:
