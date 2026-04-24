@@ -79,6 +79,6 @@ spec:
       inputs:
         chartPath: services/hello-app
         valuesFile: services/hello-app/values.yaml
-        kustomizeDir: assets/fixtures/kustomize
-        terraformDir: assets/fixtures/terraform
-        workflowFile: assets/workflows/provider-smoke.yaml
+        kustomizeDir: website/smoke/kustomize
+        terraformDir: website/smoke/terraform
+        workflowFile: website/smoke/provider-smoke.yaml

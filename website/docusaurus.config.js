@@ -66,7 +66,7 @@ const config = {
           title: 'Repo',
           items: [
             { label: 'Intent', href: 'https://github.com/sourceplane/example-platform-repo/blob/main/intent.yaml' },
-            { label: 'Compositions', href: 'https://github.com/sourceplane/example-platform-repo/tree/main/assets/config/compositions' },
+            { label: 'Compositions', href: 'https://github.com/sourceplane/example-platform-repo/tree/main/compositions' },
           ],
         },
       ],

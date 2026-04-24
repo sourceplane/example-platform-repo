@@ -10,13 +10,14 @@ compositions:
   sources:
     - name: example-platform
       kind: dir
-      path: ./assets/config/compositions
+      path: ./compositions
 
 discovery:
   roots:
     - infra/
     - deploy/
     - charts/
+    - website/
 
 environments:
   development:
