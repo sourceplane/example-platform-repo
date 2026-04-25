@@ -14,16 +14,32 @@ compositions:
 
 discovery:
   roots:
+    - apps/
     - infra/
     - deploy/
     - charts/
+    - packages/
     - website/
 
 environments:
+  dev:
+    defaults:
+      lane: dry-run
+      namespacePrefix: dev-
+    policies:
+      requireApproval: "false"
+
   development:
     defaults:
       lane: dry-run
       namespacePrefix: dev-
+    policies:
+      requireApproval: "false"
+
+  preview:
+    defaults:
+      lane: verify
+      namespacePrefix: preview-
     policies:
       requireApproval: "false"
 

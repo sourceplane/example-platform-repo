@@ -5,9 +5,15 @@
 .gluon/
 .gluon-state.json
 .artifacts/
+.pnpm-store/
+.turbo/
+node_modules/
 plan.json
 kiox.lock
 .terraform/
+apps/*/.wrangler/
+apps/*/dist/
+packages/*/dist/
 website/.docusaurus/
 website/.wrangler/
 website/docs-build/

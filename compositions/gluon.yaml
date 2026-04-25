@@ -14,9 +14,19 @@ spec:
       path: helm-values/job.yaml
     - composition: helm-chart
       path: helm-chart/job.yaml
+    - composition: cloudflare-worker-turbo
+      path: cloudflare-worker-turbo/job.yaml
+    - composition: cloudflare-worker
+      path: cloudflare-worker/job.yaml
     - composition: cloudflare-pages
       path: cloudflare-pages/job.yaml
+    - composition: cloudflare-pages-turbo
+      path: cloudflare-pages-turbo/job.yaml
     - composition: cloudflare-pages-terraform
       path: cloudflare-pages-terraform/job.yaml
+    - composition: cloudflare-pages-turbo-terraform
+      path: cloudflare-pages-turbo-terraform/job.yaml
+    - composition: turbo-package
+      path: turbo-package/job.yaml
     - composition: workspace
       path: workspace/job.yaml
