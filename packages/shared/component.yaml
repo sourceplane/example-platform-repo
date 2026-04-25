@@ -1,0 +1,27 @@
+apiVersion: sourceplane.io/v1
+kind: Component
+
+metadata:
+  name: platform-shared
+
+spec:
+  type: turbo-package
+  domain: platform-packages
+  subscribe:
+    environments:
+      - development
+      - staging
+      - production
+  inputs:
+    workspaceDir: ../..
+    packageDir: packages/shared
+    installCommand: pnpm install --no-frozen-lockfile
+    buildCommand: pnpm turbo run build --filter=@example/shared
+    typecheckCommand: pnpm turbo run typecheck --filter=@example/shared
+    nodeVersion: "20"
+    pnpmVersion: "10.12.1"
+  labels:
+    team: platform
+    layer: shared
+    surface: runtime
+    runtime: node

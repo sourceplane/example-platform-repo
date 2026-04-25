@@ -1,0 +1,125 @@
+apiVersion: sourceplane.io/v1alpha1
+kind: Composition
+metadata:
+  name: cloudflare-worker-turbo
+spec:
+  type: cloudflare-worker-turbo
+  description: Install a Turbo workspace, verify a Cloudflare Worker app, and deploy it from the production branch
+  defaultJob: verify-deploy-cloudflare-worker-turbo
+  inputSchema:
+    $schema: http://json-schema.org/draft-07/schema#
+    title: Cloudflare Worker Turbo Component
+    description: Schema for Cloudflare Workers deployed from a pnpm and Turbo monorepo
+    type: object
+    required:
+      - name
+      - type
+      - inputs
+    properties:
+      name:
+        type: string
+        description: Component name
+      type:
+        type: string
+        const: cloudflare-worker-turbo
+        description: Component type identifier
+      inputs:
+        type: object
+        required:
+          - workspaceDir
+          - appDir
+          - installCommand
+          - buildCommand
+          - typecheckCommand
+          - deployCommand
+          - nodeVersion
+          - pnpmVersion
+          - productionBranch
+        properties:
+          workspaceDir:
+            type: string
+            description: Path to the monorepo root relative to the component directory
+          appDir:
+            type: string
+            description: Monorepo-root relative directory that owns the Cloudflare Worker app
+          installCommand:
+            type: string
+            description: Command used to install workspace dependencies before build and typecheck
+          buildCommand:
+            type: string
+            description: Command used to build the Worker app from the workspace root
+          typecheckCommand:
+            type: string
+            description: Command used to typecheck the Worker app from the workspace root
+          deployCommand:
+            type: string
+            description: Command used to publish the Worker app to Cloudflare from the workspace root
+          nodeVersion:
+            type: string
+            description: Node.js version provisioned for the workspace commands
+          pnpmVersion:
+            type: string
+            description: pnpm version provisioned for the workspace commands
+          productionBranch:
+            type: string
+            description: Branch that is allowed to deploy the Worker app
+        additionalProperties: false
+    additionalProperties: true
+  jobs:
+    - name: verify-deploy-cloudflare-worker-turbo
+      description: Install a pnpm workspace, verify a Worker app, and deploy it from the production branch
+      runsOn: ubuntu-22.04
+      timeout: 30m
+      retries: 0
+      labels:
+        scope: delivery
+      steps:
+        - id: setup-node
+          name: setup-node
+          use: actions/setup-node@v4
+          with:
+            node-version: "{{.nodeVersion}}"
+        - id: setup-pnpm
+          name: setup-pnpm
+          use: pnpm/action-setup@v4
+          with:
+            version: "{{.pnpmVersion}}"
+        - name: install-workspace-dependencies
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.installCommand}}
+          onFailure: stop
+        - name: verify-worker-structure
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            test -f "{{.appDir}}/package.json"
+            test -f "{{.appDir}}/wrangler.jsonc"
+          onFailure: stop
+        - name: build-worker
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.buildCommand}}
+          onFailure: stop
+        - name: typecheck-worker
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.typecheckCommand}}
+          onFailure: stop
+        - name: deploy-worker
+          shell: bash
+          run: |
+            if [ "{{.Environment}}" != "production" ] || [ "${GITHUB_REF:-}" != "refs/heads/{{.productionBranch}}" ]; then
+              echo "Skipping Cloudflare Worker deploy for {{.appDir}} in {{.Environment}} on ${GITHUB_REF:-local}."
+              exit 0
+            fi
+
+            : "${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is required for deploy}"
+            : "${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required for deploy}"
+
+            cd "{{.workspaceDir}}"
+            {{.deployCommand}}
+          onFailure: stop

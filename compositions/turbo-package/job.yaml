@@ -1,0 +1,102 @@
+apiVersion: sourceplane.io/v1alpha1
+kind: Composition
+metadata:
+  name: turbo-package
+spec:
+  type: turbo-package
+  description: Install a Turbo workspace and verify a shared package from the monorepo root
+  defaultJob: verify-turbo-package
+  inputSchema:
+    $schema: http://json-schema.org/draft-07/schema#
+    title: Turbo Package Component
+    description: Schema for non-deploying package components validated through pnpm and Turbo
+    type: object
+    required:
+      - name
+      - type
+      - inputs
+    properties:
+      name:
+        type: string
+        description: Component name
+      type:
+        type: string
+        const: turbo-package
+        description: Component type identifier
+      inputs:
+        type: object
+        required:
+          - workspaceDir
+          - packageDir
+          - installCommand
+          - buildCommand
+          - typecheckCommand
+          - nodeVersion
+          - pnpmVersion
+        properties:
+          workspaceDir:
+            type: string
+            description: Path to the monorepo root relative to the component directory
+          packageDir:
+            type: string
+            description: Monorepo-root relative directory that owns the shared package
+          installCommand:
+            type: string
+            description: Command used to install workspace dependencies before validation
+          buildCommand:
+            type: string
+            description: Command used to build or validate the shared package from the workspace root
+          typecheckCommand:
+            type: string
+            description: Command used to typecheck the shared package from the workspace root
+          nodeVersion:
+            type: string
+            description: Node.js version provisioned for the workspace commands
+          pnpmVersion:
+            type: string
+            description: pnpm version provisioned for the workspace commands
+        additionalProperties: false
+    additionalProperties: true
+  jobs:
+    - name: verify-turbo-package
+      description: Install the workspace and validate a shared package from the monorepo root
+      runsOn: ubuntu-22.04
+      timeout: 25m
+      retries: 0
+      labels:
+        scope: verify
+      steps:
+        - id: setup-node
+          name: setup-node
+          use: actions/setup-node@v4
+          with:
+            node-version: "{{.nodeVersion}}"
+        - id: setup-pnpm
+          name: setup-pnpm
+          use: pnpm/action-setup@v4
+          with:
+            version: "{{.pnpmVersion}}"
+        - name: install-workspace-dependencies
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.installCommand}}
+          onFailure: stop
+        - name: verify-package-structure
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            test -f "{{.packageDir}}/package.json"
+          onFailure: stop
+        - name: build-package
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.buildCommand}}
+          onFailure: stop
+        - name: typecheck-package
+          shell: bash
+          run: |
+            cd "{{.workspaceDir}}"
+            {{.typecheckCommand}}
+          onFailure: stop

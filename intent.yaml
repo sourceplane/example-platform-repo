@@ -14,9 +14,11 @@ compositions:
 
 discovery:
   roots:
+    - apps/
     - infra/
     - deploy/
     - charts/
+    - packages/
     - website/
 
 environments:
