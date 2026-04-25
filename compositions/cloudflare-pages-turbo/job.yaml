@@ -4,12 +4,12 @@ metadata:
   name: cloudflare-pages-turbo
 spec:
   type: cloudflare-pages-turbo
-  description: Install a Turbo workspace, build a static app, and direct-upload it to Cloudflare Pages
+  description: Build a static app with Turbo and direct-upload it to Cloudflare Pages
   defaultJob: verify-deploy-cloudflare-pages-turbo
   inputSchema:
     $schema: http://json-schema.org/draft-07/schema#
     title: Cloudflare Pages Turbo Component
-    description: Schema for Cloudflare Pages direct upload apps deployed from a pnpm and Turbo monorepo
+    description: Schema for Cloudflare Pages direct upload apps in a pnpm and Turbo monorepo
     type: object
     required:
       - name
@@ -26,48 +26,38 @@ spec:
       inputs:
         type: object
         required:
-          - workspaceDir
-          - appDir
-          - installCommand
-          - buildCommand
           - outputDir
           - projectName
           - nodeVersion
           - pnpmVersion
           - productionBranch
         properties:
-          workspaceDir:
-            type: string
-            description: Path to the monorepo root relative to the component directory
-          appDir:
-            type: string
-            description: Monorepo-root relative directory that owns the Pages app
-          installCommand:
-            type: string
-            description: Command used to install workspace dependencies before the build
-          buildCommand:
-            type: string
-            description: Command used to build the Pages app from the workspace root
           outputDir:
             type: string
-            description: Monorepo-root relative directory produced by the static site build
+            description: Build output directory relative to the component directory
           projectName:
             type: string
             description: Cloudflare Pages project name used for direct upload
           nodeVersion:
             type: string
-            description: Node.js version provisioned for the workspace commands
+            description: Node.js version
           pnpmVersion:
             type: string
-            description: pnpm version provisioned for the workspace commands
+            description: pnpm version
           productionBranch:
             type: string
             description: Branch that is allowed to publish the Pages app
+          preBuildCommand:
+            type: string
+            description: Optional command to run before the build (e.g. codegen, schema generation)
+          buildCommand:
+            type: string
+            description: Override the default turbo build command
         additionalProperties: false
     additionalProperties: true
   jobs:
     - name: verify-deploy-cloudflare-pages-turbo
-      description: Install a pnpm workspace, build a Pages app, and direct-upload it from the production branch
+      description: Build a Pages app and direct-upload it from the production branch
       runsOn: ubuntu-22.04
       timeout: 30m
       retries: 0
@@ -85,27 +75,26 @@ spec:
           with:
             version: "{{.pnpmVersion}}"
         - name: install-workspace-dependencies
+          run: pnpm install --no-frozen-lockfile
+          onFailure: stop
+        - name: pre-build
           shell: bash
           run: |
-            cd "{{.workspaceDir}}"
-            {{.installCommand}}
+            {{if .preBuildCommand}}
+            {{.preBuildCommand}}
+            {{else}}
+            echo "Skipping pre-build."
+            {{end}}
           onFailure: stop
         - name: verify-pages-app-structure
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            test -f "{{.appDir}}/package.json"
+          run: test -f package.json
           onFailure: stop
         - name: build-pages-app
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            {{.buildCommand}}
+          run: "{{if .buildCommand}}{{.buildCommand}}{{else}}pnpm exec turbo run build --filter=./{{end}}"
           onFailure: stop
         - name: verify-build-output
           shell: bash
           run: |
-            cd "{{.workspaceDir}}"
             test -d "{{.outputDir}}"
             find "{{.outputDir}}" -maxdepth 2 -type f | head -n 20
           onFailure: stop
@@ -113,7 +102,7 @@ spec:
           shell: bash
           run: |
             if [ "{{.Environment}}" != "production" ] || [ "${GITHUB_REF:-}" != "refs/heads/{{.productionBranch}}" ]; then
-              echo "Skipping Cloudflare Pages project reconciliation for {{.appDir}} in {{.Environment}} on ${GITHUB_REF:-local}."
+              echo "Skipping Cloudflare Pages project reconciliation for {{.Component}} in {{.Environment}} on ${GITHUB_REF:-local}."
               exit 0
             fi
 
@@ -151,14 +140,13 @@ spec:
           shell: bash
           run: |
             if [ "{{.Environment}}" != "production" ] || [ "${GITHUB_REF:-}" != "refs/heads/{{.productionBranch}}" ]; then
-              echo "Skipping Cloudflare Pages deploy for {{.appDir}} in {{.Environment}} on ${GITHUB_REF:-local}."
+              echo "Skipping Cloudflare Pages deploy for {{.Component}} in {{.Environment}} on ${GITHUB_REF:-local}."
               exit 0
             fi
 
             : "${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is required for deployment}"
             : "${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required for deployment}"
 
-            cd "{{.workspaceDir}}"
             pnpm exec wrangler pages deploy "{{.outputDir}}" \
               --project-name "{{.projectName}}" \
               --branch "{{.productionBranch}}"

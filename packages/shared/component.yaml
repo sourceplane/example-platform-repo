@@ -9,15 +9,11 @@ spec:
   domain: platform-packages
   subscribe:
     environments:
+      - dev
       - development
       - staging
       - production
   inputs:
-    workspaceDir: ../..
-    packageDir: packages/shared
-    installCommand: pnpm install --no-frozen-lockfile
-    buildCommand: pnpm turbo run build --filter=@example/shared
-    typecheckCommand: pnpm turbo run typecheck --filter=@example/shared
     nodeVersion: "20"
     pnpmVersion: "10.12.1"
   labels:

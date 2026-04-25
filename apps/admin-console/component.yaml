@@ -9,15 +9,12 @@ spec:
   domain: platform-ui
   subscribe:
     environments:
+      - staging
       - production
   inputs:
-    workspaceDir: ../..
-    appDir: apps/admin-console
-    installCommand: pnpm install --no-frozen-lockfile
-    buildCommand: pnpm turbo run build --filter=@example/admin-console
     cloudflareBuildCommand: corepack enable && pnpm turbo run build --filter=@example/admin-console
-    outputDir: apps/admin-console/dist
-    destinationDir: apps/admin-console/dist
+    outputDir: dist
+    destinationDir: dist
     rootDir: .
     nodeVersion: "20"
     pnpmVersion: "10.12.1"

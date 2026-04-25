@@ -4,12 +4,12 @@ metadata:
   name: cloudflare-pages-turbo-terraform
 spec:
   type: cloudflare-pages-turbo-terraform
-  description: Install a Turbo workspace, verify a static app locally, and reconcile a Git-backed Cloudflare Pages project with Terraform
+  description: Verify a static app with Turbo locally and reconcile a Git-backed Cloudflare Pages project with Terraform
   defaultJob: verify-reconcile-cloudflare-pages-turbo-terraform
   inputSchema:
     $schema: http://json-schema.org/draft-07/schema#
     title: Cloudflare Pages Turbo Terraform Component
-    description: Schema for Git-backed Cloudflare Pages projects managed from a pnpm and Turbo monorepo
+    description: Schema for Git-backed Cloudflare Pages projects in a pnpm and Turbo monorepo
     type: object
     required:
       - name
@@ -26,10 +26,6 @@ spec:
       inputs:
         type: object
         required:
-          - workspaceDir
-          - appDir
-          - installCommand
-          - buildCommand
           - cloudflareBuildCommand
           - outputDir
           - destinationDir
@@ -43,24 +39,12 @@ spec:
           - repoOwner
           - repoName
         properties:
-          workspaceDir:
-            type: string
-            description: Path to the monorepo root relative to the component directory
-          appDir:
-            type: string
-            description: Monorepo-root relative directory that owns the Pages app
-          installCommand:
-            type: string
-            description: Command used to install workspace dependencies before the local build
-          buildCommand:
-            type: string
-            description: Command used to build the Pages app from the workspace root
           cloudflareBuildCommand:
             type: string
             description: Build command Cloudflare Pages runs when building the Git-backed project
           outputDir:
             type: string
-            description: Monorepo-root relative directory produced by the local build
+            description: Build output directory relative to the component directory
           destinationDir:
             type: string
             description: Cloudflare rootDir-relative output directory published after the build
@@ -69,16 +53,16 @@ spec:
             description: Repository-root relative directory Cloudflare Pages should build from
           nodeVersion:
             type: string
-            description: Node.js version provisioned for the local workspace commands
+            description: Node.js version
           pnpmVersion:
             type: string
-            description: pnpm version provisioned for the local workspace commands
+            description: pnpm version
           terraformDir:
             type: string
-            description: Terraform root directory used to reconcile the Pages project relative to the component directory
+            description: Terraform root directory relative to the component directory
           terraformVersion:
             type: string
-            description: Terraform version provisioned for the reconciliation job
+            description: Terraform version
           projectName:
             type: string
             description: Cloudflare Pages project name managed by Terraform
@@ -91,11 +75,17 @@ spec:
           repoName:
             type: string
             description: GitHub repository name connected to the Cloudflare Pages project
+          preBuildCommand:
+            type: string
+            description: Optional command to run before the build (e.g. codegen, schema generation)
+          buildCommand:
+            type: string
+            description: Override the default turbo build command
         additionalProperties: false
     additionalProperties: true
   jobs:
     - name: verify-reconcile-cloudflare-pages-turbo-terraform
-      description: Install a pnpm workspace, verify a Pages app locally, and reconcile the Git-backed Pages project
+      description: Verify a Pages app locally and reconcile the Git-backed Pages project
       runsOn: ubuntu-22.04
       timeout: 35m
       retries: 0
@@ -113,27 +103,26 @@ spec:
           with:
             version: "{{.pnpmVersion}}"
         - name: install-workspace-dependencies
+          run: pnpm install --no-frozen-lockfile
+          onFailure: stop
+        - name: pre-build
           shell: bash
           run: |
-            cd "{{.workspaceDir}}"
-            {{.installCommand}}
+            {{if .preBuildCommand}}
+            {{.preBuildCommand}}
+            {{else}}
+            echo "Skipping pre-build."
+            {{end}}
           onFailure: stop
         - name: verify-pages-app-structure
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            test -f "{{.appDir}}/package.json"
+          run: test -f package.json
           onFailure: stop
         - name: build-pages-app
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            {{.buildCommand}}
+          run: "{{if .buildCommand}}{{.buildCommand}}{{else}}pnpm exec turbo run build --filter=./{{end}}"
           onFailure: stop
         - name: verify-build-output
           shell: bash
           run: |
-            cd "{{.workspaceDir}}"
             test -d "{{.outputDir}}"
             find "{{.outputDir}}" -maxdepth 2 -type f | head -n 20
           onFailure: stop

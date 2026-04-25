@@ -16,6 +16,8 @@ spec:
       path: helm-chart/job.yaml
     - composition: cloudflare-worker-turbo
       path: cloudflare-worker-turbo/job.yaml
+    - composition: cloudflare-worker
+      path: cloudflare-worker/job.yaml
     - composition: cloudflare-pages
       path: cloudflare-pages/job.yaml
     - composition: cloudflare-pages-turbo

@@ -4,12 +4,12 @@ metadata:
   name: turbo-package
 spec:
   type: turbo-package
-  description: Install a Turbo workspace and verify a shared package from the monorepo root
+  description: Verify a shared package in a pnpm and Turbo monorepo
   defaultJob: verify-turbo-package
   inputSchema:
     $schema: http://json-schema.org/draft-07/schema#
     title: Turbo Package Component
-    description: Schema for non-deploying package components validated through pnpm and Turbo
+    description: Schema for shared package components validated through pnpm and Turbo
     type: object
     required:
       - name
@@ -26,40 +26,29 @@ spec:
       inputs:
         type: object
         required:
-          - workspaceDir
-          - packageDir
-          - installCommand
-          - buildCommand
-          - typecheckCommand
           - nodeVersion
           - pnpmVersion
         properties:
-          workspaceDir:
-            type: string
-            description: Path to the monorepo root relative to the component directory
-          packageDir:
-            type: string
-            description: Monorepo-root relative directory that owns the shared package
-          installCommand:
-            type: string
-            description: Command used to install workspace dependencies before validation
-          buildCommand:
-            type: string
-            description: Command used to build or validate the shared package from the workspace root
-          typecheckCommand:
-            type: string
-            description: Command used to typecheck the shared package from the workspace root
           nodeVersion:
             type: string
-            description: Node.js version provisioned for the workspace commands
+            description: Node.js version
           pnpmVersion:
             type: string
-            description: pnpm version provisioned for the workspace commands
+            description: pnpm version
+          preBuildCommand:
+            type: string
+            description: Optional command to run before the build (e.g. codegen, schema generation)
+          buildCommand:
+            type: string
+            description: Override the default turbo build command
+          typecheckCommand:
+            type: string
+            description: Override the default turbo typecheck command
         additionalProperties: false
     additionalProperties: true
   jobs:
     - name: verify-turbo-package
-      description: Install the workspace and validate a shared package from the monorepo root
+      description: Install the workspace and validate a shared package
       runsOn: ubuntu-22.04
       timeout: 25m
       retries: 0
@@ -77,26 +66,23 @@ spec:
           with:
             version: "{{.pnpmVersion}}"
         - name: install-workspace-dependencies
+          run: pnpm install --no-frozen-lockfile
+          onFailure: stop
+        - name: pre-build
           shell: bash
           run: |
-            cd "{{.workspaceDir}}"
-            {{.installCommand}}
+            {{if .preBuildCommand}}
+            {{.preBuildCommand}}
+            {{else}}
+            echo "Skipping pre-build."
+            {{end}}
           onFailure: stop
         - name: verify-package-structure
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            test -f "{{.packageDir}}/package.json"
+          run: test -f package.json
           onFailure: stop
         - name: build-package
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            {{.buildCommand}}
+          run: "{{if .buildCommand}}{{.buildCommand}}{{else}}pnpm exec turbo run build --filter=./{{end}}"
           onFailure: stop
         - name: typecheck-package
-          shell: bash
-          run: |
-            cd "{{.workspaceDir}}"
-            {{.typecheckCommand}}
+          run: "{{if .typecheckCommand}}{{.typecheckCommand}}{{else}}pnpm exec turbo run typecheck --filter=./{{end}}"
           onFailure: stop
