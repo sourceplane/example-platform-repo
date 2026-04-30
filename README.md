@@ -2,6 +2,8 @@
 
 This sample models a small but realistic platform repo with multiple component types, domains, and environments using gluon component discovery.
 
+For a detailed breakdown of the repo structure and a provider-style OCI composition playbook, see [`GLUON_PROVIDER_STYLE_REPO_GUIDE.md`](./GLUON_PROVIDER_STYLE_REPO_GUIDE.md).
+
 `gluon` compiles the intent in `intent.yaml` into an immutable execution DAG of terraform, helm-values, helm-chart, Cloudflare Worker, Cloudflare Pages, and Turbo package jobs. Environment policy still lives in the intent, while each owned directory carries its own `component.yaml` manifest. The sample now demonstrates two of the newer gluon operating patterns:
 
 - intent-driven composition source resolution from `intent.yaml`

@@ -2,9 +2,9 @@ apiVersion: sourceplane.io/v1alpha1
 kind: CompositionLock
 sources:
     - name: example-platform
-      kind: dir
-      path: ./compositions
-      resolvedDigest: sha256:a0cae8132ca0cb24e757324097e52b6dfd19feb9824f9049d2d8094c8dbfd3f4
+      kind: oci
+      ref: oci://ghcr.io/sourceplane/sumo-ops-platform-orun-stack:0.9.2
+      resolvedDigest: sha256:b5d7d9a24a907d84afe7bb9dcb572d2f68398054f3fe4658a382a8703b5b1215
       exports:
         - cloudflare-pages
         - cloudflare-pages-terraform

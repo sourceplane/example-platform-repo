@@ -4,4 +4,4 @@ metadata:
     name: example-platform
 providers:
     gluon:
-        source: ghcr.io/sourceplane/gluon:v0.18.0
+        source: ghcr.io/sourceplane/orun:v1.5.0
