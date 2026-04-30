@@ -1,0 +1,19 @@
+apiVersion: sourceplane.io/v1alpha1
+kind: CompositionLock
+sources:
+    - name: example-platform
+      kind: dir
+      path: ./compositions
+      resolvedDigest: sha256:a0cae8132ca0cb24e757324097e52b6dfd19feb9824f9049d2d8094c8dbfd3f4
+      exports:
+        - cloudflare-pages
+        - cloudflare-pages-terraform
+        - cloudflare-pages-turbo
+        - cloudflare-pages-turbo-terraform
+        - cloudflare-worker
+        - cloudflare-worker-turbo
+        - helm-chart
+        - helm-values
+        - terraform
+        - turbo-package
+        - workspace
