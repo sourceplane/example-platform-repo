@@ -3,5 +3,5 @@ kind: Workspace
 metadata:
     name: example-platform
 providers:
-    gluon:
-        source: ghcr.io/sourceplane/orun:v1.5.0
+    orun:
+        source: ghcr.io/sourceplane/orun:v0.9.5
