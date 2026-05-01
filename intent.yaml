@@ -10,7 +10,7 @@ compositions:
   sources:
     - name: example-platform
       kind: oci
-      ref: oci://ghcr.io/sourceplane/sumo-ops-platform-orun-stack:0.9.2
+      ref: oci://ghcr.io/sourceplane/sumo-platform-ops-stack:0.9.3
 
 discovery:
   roots:
