@@ -17,10 +17,9 @@ The repo layout splits the sample into dedicated areas:
 - `charts/*/chart` for Helm chart components
 - `packages/*` for shared Turbo package components that validate from the workspace root
 - `schemas/` for intent and job schema definitions
-- `compositions/` for packaged Gluon compositions
 - `website/` for the Docusaurus docs site and its direct-upload component
 
-`intent.yaml` declares `compositions` as a local composition package source. That package exports one composition per component type:
+`intent.yaml` pins the published OCI composition package from [`sourceplane/sumo-platform-ops-stack`](https://github.com/sourceplane/sumo-platform-ops-stack). That provider exports one composition per component type:
 
 - `terraform` installs Terraform through `hashicorp/setup-terraform` before running `fmt`, `init`, and `validate`
 - `helm-values` installs Helm through `azure/setup-helm` before linting and templating the paired chart path
@@ -34,7 +33,7 @@ The repo layout splits the sample into dedicated areas:
 
 `intent.yaml` declares discovery roots for `apps/`, `infra/`, `deploy/`, `charts/`, `packages/`, and `website/`. The discovered manifests use `spec.subscribe.environments` so the sample does not duplicate environment membership in inline component lists. Because manifests live beside the code they own, gluon infers the working directory automatically when `spec.path` is omitted.
 
-The workspace manifest in `kiox.yaml` now pins `ghcr.io/sourceplane/gluon:v0.9.2`. The tool setup logic moved into the composition jobs themselves, which keeps the workspace surface small and the CI runner portable.
+The workspace manifest in `kiox.yaml` pins `ghcr.io/sourceplane/orun:v0.9.6`. The tool setup logic lives in the composition jobs themselves, which keeps the workspace surface small and the CI runner portable.
 
 The CI workflow has two lanes:
 
