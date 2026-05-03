@@ -1,4 +1,5 @@
 # example-platform-repo
+<!-- ci: orun-action matrix pipeline with remote state backend -->
 
 This sample models a small but realistic platform repo with multiple component types, domains, and environments using Orun component discovery and Stack Tectonic composition packages.
 
