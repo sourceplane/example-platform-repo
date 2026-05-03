@@ -18,3 +18,9 @@ website/.docusaurus/
 website/.wrangler/
 website/docs-build/
 website/node_modules/
+
+# gluon per-job staged workspaces
+.gluon/runs/
+
+# orun per-job staged workspaces
+.orun/runs/
