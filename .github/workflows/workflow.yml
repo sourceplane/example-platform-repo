@@ -29,9 +29,11 @@ jobs:
       - name: Initialize orun workspace
         uses: sourceplane/kiox-action@v2.1.2
 
-      - name: Compile review-scoped plan
+      - name: Compile changed-aware review plan
         run: |
-          kiox -- orun plan
+          kiox -- orun plan --changed --explain \
+            --base ${{ github.event.pull_request.base.sha }} \
+            --head ${{ github.event.pull_request.head.sha }}
 
   platform-smoke:
     name: Full Platform Smoke
