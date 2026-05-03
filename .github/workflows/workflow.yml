@@ -55,9 +55,13 @@ jobs:
         run: |
           kiox -- orun plan --view dag
 
-      - name: Execute full plan
+      - name: Execute non-production smoke subset
         env:
+          ORUN_SMOKE_ENVS: dev,development,preview,staging
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          kiox -- orun run --concurrency 5
+          kiox -- orun run --env "$ORUN_SMOKE_ENVS" --concurrency 5 || {
+            kiox -- orun logs --failed || true
+            exit 1
+          }
