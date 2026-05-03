@@ -113,3 +113,4 @@ jobs:
           remote-state: true
           backend-url: ${{ vars.ORUN_BACKEND_URL }}
           exec-id: ${{ github.run_id }}-${{ github.run_attempt }}
+          dry-run: ${{ vars.ORUN_DRY_RUN || 'true' }}
