@@ -56,6 +56,12 @@ jobs:
           upload-artifact: false
       - name: test
         run: orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
+      - uses: sourceplane/kiox-action@v2.1.2
+        with:
+          providers: |
+            sourceplane/orun as orun
+          run: |
+            orun plan --changed
 
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
   plan:
@@ -79,12 +85,6 @@ jobs:
         id: plan
         with:
           intent: intent.yaml
-      - uses: sourceplane/kiox-action@v2.1.2
-        with:
-          providers: |
-            sourceplane/orun as orun
-          run: |
-            orun plan --changed
 
   execute:
     name: Execute ${{ matrix.job-id }}
