@@ -58,10 +58,9 @@ jobs:
         run: orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
       - uses: sourceplane/kiox-action@v2.1.2
         with:
-          providers: |
-            sourceplane/orun:v1.12.5 as orun
           run: |
             pwd
+            ls
             orun plan --changed
 
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
