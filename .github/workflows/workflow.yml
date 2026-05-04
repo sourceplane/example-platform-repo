@@ -61,6 +61,7 @@ jobs:
           providers: |
             sourceplane/orun:v1.12.5 as orun
           run: |
+            pwd
             orun plan --changed
 
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
