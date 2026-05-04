@@ -63,7 +63,9 @@ jobs:
       #     registry: ghcr.io
       #     username: ${{ github.actor }}
       #     password: ${{ secrets.GITHUB_TOKEN }}
-
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: sourceplane/orun-action/plan@v1.1.0
         id: plan
         with:
