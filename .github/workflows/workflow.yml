@@ -46,14 +46,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: sourceplane/orun-action/plan@v1
-        id: plan
-        with:
-          intent: intent.yaml
-          changed-only: true
-          base-ref: ${{ github.event.pull_request.base.sha }}
-          head-ref: ${{ github.event.pull_request.head.sha }}
-          upload-artifact: false
+      # - uses: sourceplane/orun-action/plan@v1
+      #   id: plan
+      #   with:
+      #     intent: intent.yaml
+      #     changed-only: true
+      #     base-ref: ${{ github.event.pull_request.base.sha }}
+      #     head-ref: ${{ github.event.pull_request.head.sha }}
+      #     upload-artifact: false
       - name: test
         run: orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
       - uses: sourceplane/kiox-action@v2.1.2
