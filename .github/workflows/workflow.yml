@@ -25,10 +25,12 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }} 
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: sourceplane/orun-action/plan@v1.1.0
         id: plan
+        with:
+          intent: intent.yaml
 
   execute:
     name: ${{ matrix.job-id }}
