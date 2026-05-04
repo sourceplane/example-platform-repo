@@ -59,7 +59,7 @@ jobs:
       - uses: sourceplane/kiox-action@v2.1.2
         with:
           providers: |
-            sourceplane/orun as orun
+            sourceplane/orun:v1.12.5 as orun
           run: |
             orun plan --changed
 
