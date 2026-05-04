@@ -12,6 +12,7 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
+  ORUN_BACKEND_URL: ${{ vars.ORUN_BACKEND_URL }}
 
 jobs:
   plan:
@@ -55,6 +56,5 @@ jobs:
         run: |
           orun run --changed \
             --remote-state \
-            --backend-url "https://orun-api.sourceplane.ai" \
             --job "${{ matrix.job-id }}" \
             --exec-id "${{ github.run_id }}-${{ github.run_attempt }}"
