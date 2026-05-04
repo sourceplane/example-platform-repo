@@ -54,7 +54,7 @@ jobs:
       - name: Download plan artifact
         uses: actions/download-artifact@v4
         with:
-          name: plan.json
+          name: orun-plan
       - uses: sourceplane/orun-action@v1.1.0
       - name: run job steps
         run: |
