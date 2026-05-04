@@ -10,6 +10,9 @@ permissions:
   packages: read
   id-token: write   # orun remote-state OIDC authentication
 
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+
 jobs:
   plan:
     name: Orun Plan
@@ -22,12 +25,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Log in to GHCR
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: sourceplane/orun-action/plan@v1.1.0
         id: plan
@@ -54,18 +57,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      # - name: Log in to GHCR
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: sourceplane/orun-action/plan@v1.1.0
+        id: plan
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: sourceplane/orun-action@v1.1.0
-
+          intent: intent.yaml
+          changed-only: true
       - name: run job steps
         run: |
           orun run \
-            --plan "plan.json" \
             --job "${{ matrix.job-id }}" \
             --exec-id "${{ github.run_id }}-${{ github.run_attempt }}"
