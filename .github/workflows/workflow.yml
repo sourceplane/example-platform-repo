@@ -55,5 +55,6 @@ jobs:
         run: |
           orun run --changed \
             --remote-state \
+            --backend-url "https://orun-backend.sourceplane.ai" \
             --job "${{ matrix.job-id }}" \
             --exec-id "${{ github.run_id }}-${{ github.run_attempt }}"
