@@ -46,19 +46,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - uses: sourceplane/orun-action/plan@v1
-      #   id: plan
-      #   with:
-      #     intent: intent.yaml
-      #     changed-only: true
-      #     base-ref: ${{ github.event.pull_request.base.sha }}
-      #     head-ref: ${{ github.event.pull_request.head.sha }}
-      #     upload-artifact: false
+      - uses: sourceplane/orun-action/plan@v1.1.0
+        id: plan
+        with:
+          intent: intent.yaml
+          changed-only: true
+          base-ref: ${{ github.event.pull_request.base.sha }}
+          head-ref: ${{ github.event.pull_request.head.sha }}
+          upload-artifact: false
 
-      - uses: sourceplane/kiox-action@v2.1.2
+      # - uses: sourceplane/kiox-action@v2.1.2
 
-      - name: test
-        run: kiox -- orun plan --changed
+      # - name: test
+      #   run: kiox -- orun plan --changed
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
   plan:
     name: Compile plan
@@ -77,7 +77,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: sourceplane/orun-action/plan@v1
+      - uses: sourceplane/orun-action/plan@v1.1.0
         id: plan
         with:
           intent: intent.yaml
@@ -108,7 +108,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: sourceplane/orun-action/run@v1
+      - uses: sourceplane/orun-action/run@v1.1.0
         with:
           plan: plan.json
           job: ${{ matrix.job-id }}
