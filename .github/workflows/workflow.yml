@@ -31,6 +31,7 @@ jobs:
         id: plan
         with:
           intent: intent.yaml
+          changed-only: true
 
   execute:
     name: ${{ matrix.job-id }}
