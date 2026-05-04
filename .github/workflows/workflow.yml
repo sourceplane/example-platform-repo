@@ -60,6 +60,7 @@ jobs:
         run: |
           orun run \
             --plan plan.json \
+            --runner github-actions \
             --remote-state \
             --job "${{ matrix.job-id }}" \
             --exec-id "${{ github.run_id }}-${{ github.run_attempt }}"
