@@ -54,15 +54,15 @@ jobs:
       #     base-ref: ${{ github.event.pull_request.base.sha }}
       #     head-ref: ${{ github.event.pull_request.head.sha }}
       #     upload-artifact: false
-      - name: test
-        run: orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
+
       - uses: sourceplane/kiox-action@v2.1.2
         with:
           run: |
             pwd
             ls
             orun plan --changed
-
+      - name: test
+        run: kiox -- orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
   plan:
     name: Compile plan
