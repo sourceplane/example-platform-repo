@@ -52,6 +52,8 @@ jobs:
           intent: intent.yaml
           changed-only: true
           upload-artifact: false
+      - name: test
+        run: orun plan --changed
 
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
   plan:
