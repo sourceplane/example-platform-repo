@@ -58,8 +58,8 @@ jobs:
       - uses: sourceplane/orun-action@v1.1.0
       - name: run job steps
         run: |
-          orun run --changed \
-            -- plan plan.json \
+          orun run \
+            --plan plan.json \
             --remote-state \
             --job "${{ matrix.job-id }}" \
             --exec-id "${{ github.run_id }}-${{ github.run_attempt }}"
