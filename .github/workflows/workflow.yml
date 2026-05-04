@@ -55,7 +55,7 @@ jobs:
           head-ref: ${{ github.event.pull_request.head.sha }}
           upload-artifact: false
       - name: test
-        run: orun plan --changed --base-ref ${{ github.event.pull_request.base.sha }} --head-ref ${{ github.event.pull_request.head.sha }}
+        run: orun plan --changed --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }}
 
   # ── Push to main: plan → matrix execute (Pattern 4) ─────────────────────────
   plan:
