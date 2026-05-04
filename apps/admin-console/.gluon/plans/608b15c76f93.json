@@ -1,0 +1,367 @@
+{
+  "apiVersion": "gluon.io/v1",
+  "kind": "Plan",
+  "metadata": {
+    "name": "multi-environment-platform",
+    "description": "Multi-environment DevOps sample for foundation, identity, and commerce domains",
+    "namespace": "default",
+    "generatedAt": "2026-04-26T11:21:31Z",
+    "checksum": "sha256-608b15c76f93fc0712c2d7ad8ee10c1304e34a6fedb062ca388c8d98749264d5",
+    "scope": {
+      "detectedComponent": "admin-console-pages-git",
+      "components": [
+        "admin-console-pages-git"
+      ]
+    }
+  },
+  "execution": {
+    "concurrency": 4,
+    "failFast": true
+  },
+  "spec": {
+    "jobBindings": {
+      "cloudflare-pages": "example-platform-compositions",
+      "cloudflare-pages-terraform": "example-platform-compositions",
+      "cloudflare-pages-turbo": "example-platform-compositions",
+      "cloudflare-pages-turbo-terraform": "example-platform-compositions",
+      "cloudflare-worker": "example-platform-compositions",
+      "cloudflare-worker-turbo": "example-platform-compositions",
+      "helm-chart": "example-platform-compositions",
+      "helm-values": "example-platform-compositions",
+      "terraform": "example-platform-compositions",
+      "turbo-package": "example-platform-compositions",
+      "workspace": "example-platform-compositions"
+    },
+    "compositionSources": [
+      {
+        "name": "example-platform",
+        "kind": "dir",
+        "path": "./compositions",
+        "resolvedDigest": "sha256:f7b7300ff6a1be0e76005cbc0c8b628a634dbad07e1fe57118458191a7c62cfa",
+        "exports": [
+          "cloudflare-pages",
+          "cloudflare-pages-terraform",
+          "cloudflare-pages-turbo",
+          "cloudflare-pages-turbo-terraform",
+          "cloudflare-worker",
+          "cloudflare-worker-turbo",
+          "helm-chart",
+          "helm-values",
+          "terraform",
+          "turbo-package",
+          "workspace"
+        ]
+      }
+    ]
+  },
+  "jobs": [
+    {
+      "id": "admin-console-pages-git@staging.verify-reconcile-cloudflare-pages-turbo-terraform",
+      "name": "verify-reconcile-cloudflare-pages-turbo-terraform",
+      "component": "admin-console-pages-git",
+      "environment": "staging",
+      "composition": "cloudflare-pages-turbo-terraform",
+      "jobRegistry": "example-platform-compositions",
+      "job": "verify-reconcile-cloudflare-pages-turbo-terraform",
+      "runsOn": "ubuntu-22.04",
+      "path": "apps/admin-console",
+      "steps": [
+        {
+          "id": "setup-node",
+          "name": "setup-node",
+          "phase": "main",
+          "use": "actions/setup-node@v4",
+          "with": {
+            "node-version": "20"
+          }
+        },
+        {
+          "id": "setup-pnpm",
+          "name": "setup-pnpm",
+          "phase": "main",
+          "use": "pnpm/action-setup@v4",
+          "with": {
+            "version": "10.12.1"
+          }
+        },
+        {
+          "id": "install-workspace-dependencies",
+          "name": "install-workspace-dependencies",
+          "phase": "main",
+          "run": "pnpm install --no-frozen-lockfile",
+          "onFailure": "stop"
+        },
+        {
+          "id": "pre-build",
+          "name": "pre-build",
+          "phase": "main",
+          "run": "\necho \"Skipping pre-build.\"\n\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "verify-pages-app-structure",
+          "name": "verify-pages-app-structure",
+          "phase": "main",
+          "run": "test -f package.json",
+          "onFailure": "stop"
+        },
+        {
+          "id": "build-pages-app",
+          "name": "build-pages-app",
+          "phase": "main",
+          "run": "pnpm exec turbo run build --filter=./",
+          "onFailure": "stop"
+        },
+        {
+          "id": "verify-build-output",
+          "name": "verify-build-output",
+          "phase": "main",
+          "run": "test -d \"dist\"\nfind \"dist\" -maxdepth 2 -type f | head -n 20\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "setup-terraform",
+          "name": "setup-terraform",
+          "phase": "main",
+          "use": "hashicorp/setup-terraform@v4",
+          "with": {
+            "terraform_version": "1.9.8",
+            "terraform_wrapper": "false"
+          }
+        },
+        {
+          "id": "terraform-context",
+          "name": "terraform-context",
+          "phase": "main",
+          "run": "terraform version\necho \"Reconciling Cloudflare Pages project example-platform-admin-console from ../../infra/cloudflare-pages-admin-console\"\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-fmt-check",
+          "name": "terraform-fmt-check",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console fmt -check",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-init",
+          "name": "terraform-init",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console init -input=false",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-validate",
+          "name": "terraform-validate",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console validate -no-color",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-plan-or-apply",
+          "name": "terraform-plan-or-apply",
+          "phase": "main",
+          "run": "cloudflare_account_id=\"${CLOUDFLARE_ACCOUNT_ID:-00000000000000000000000000000000}\"\n\nterraform_args=(\n  \"-input=false\"\n  \"-var=account_id=${cloudflare_account_id}\"\n  \"-var=project_name=example-platform-admin-console\"\n  \"-var=production_branch=main\"\n  \"-var=repo_owner=sourceplane\"\n  \"-var=repo_name=example-platform-repo\"\n  \"-var=build_command=corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console\"\n  \"-var=destination_dir=dist\"\n  \"-var=root_dir=.\"\n)\n\nif [ \"staging\" = \"production\" ] \u0026\u0026 [ \"${GITHUB_REF:-}\" = \"refs/heads/main\" ]; then\n  : \"${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is required for apply}\"\n  : \"${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required for apply}\"\n  terraform -chdir=../../infra/cloudflare-pages-admin-console apply -auto-approve \"${terraform_args[@]}\"\n  exit 0\nfi\n\nif [ -z \"${CLOUDFLARE_API_TOKEN:-}\" ] || [ -z \"${CLOUDFLARE_ACCOUNT_ID:-}\" ]; then\n  echo \"Skipping terraform plan because Cloudflare credentials are not available outside deployment contexts.\"\n  exit 0\nfi\n\nterraform -chdir=../../infra/cloudflare-pages-admin-console plan -lock=false -no-color \"${terraform_args[@]}\"\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        }
+      ],
+      "timeout": "35m",
+      "env": {
+        "cloudflareBuildCommand": "corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console",
+        "destinationDir": "dist",
+        "lane": "verify",
+        "namespacePrefix": "stg-",
+        "nodeVersion": "20",
+        "outputDir": "dist",
+        "pnpmVersion": "10.12.1",
+        "productionBranch": "main",
+        "projectName": "example-platform-admin-console",
+        "repoName": "example-platform-repo",
+        "repoOwner": "sourceplane",
+        "rootDir": ".",
+        "terraformDir": "../../infra/cloudflare-pages-admin-console",
+        "terraformVersion": "1.9.8"
+      },
+      "labels": {
+        "layer": "foundation",
+        "runtime": "cloudflare",
+        "surface": "admin-console",
+        "team": "platform"
+      },
+      "config": {
+        "cloudflareBuildCommand": "corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console",
+        "destinationDir": "dist",
+        "lane": "verify",
+        "namespacePrefix": "stg-",
+        "nodeVersion": "20",
+        "outputDir": "dist",
+        "pnpmVersion": "10.12.1",
+        "productionBranch": "main",
+        "projectName": "example-platform-admin-console",
+        "repoName": "example-platform-repo",
+        "repoOwner": "sourceplane",
+        "rootDir": ".",
+        "terraformDir": "../../infra/cloudflare-pages-admin-console",
+        "terraformVersion": "1.9.8"
+      }
+    },
+    {
+      "id": "admin-console-pages-git@production.verify-reconcile-cloudflare-pages-turbo-terraform",
+      "name": "verify-reconcile-cloudflare-pages-turbo-terraform",
+      "component": "admin-console-pages-git",
+      "environment": "production",
+      "composition": "cloudflare-pages-turbo-terraform",
+      "jobRegistry": "example-platform-compositions",
+      "job": "verify-reconcile-cloudflare-pages-turbo-terraform",
+      "runsOn": "ubuntu-22.04",
+      "path": "apps/admin-console",
+      "steps": [
+        {
+          "id": "setup-node",
+          "name": "setup-node",
+          "phase": "main",
+          "use": "actions/setup-node@v4",
+          "with": {
+            "node-version": "20"
+          }
+        },
+        {
+          "id": "setup-pnpm",
+          "name": "setup-pnpm",
+          "phase": "main",
+          "use": "pnpm/action-setup@v4",
+          "with": {
+            "version": "10.12.1"
+          }
+        },
+        {
+          "id": "install-workspace-dependencies",
+          "name": "install-workspace-dependencies",
+          "phase": "main",
+          "run": "pnpm install --no-frozen-lockfile",
+          "onFailure": "stop"
+        },
+        {
+          "id": "pre-build",
+          "name": "pre-build",
+          "phase": "main",
+          "run": "\necho \"Skipping pre-build.\"\n\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "verify-pages-app-structure",
+          "name": "verify-pages-app-structure",
+          "phase": "main",
+          "run": "test -f package.json",
+          "onFailure": "stop"
+        },
+        {
+          "id": "build-pages-app",
+          "name": "build-pages-app",
+          "phase": "main",
+          "run": "pnpm exec turbo run build --filter=./",
+          "onFailure": "stop"
+        },
+        {
+          "id": "verify-build-output",
+          "name": "verify-build-output",
+          "phase": "main",
+          "run": "test -d \"dist\"\nfind \"dist\" -maxdepth 2 -type f | head -n 20\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "setup-terraform",
+          "name": "setup-terraform",
+          "phase": "main",
+          "use": "hashicorp/setup-terraform@v4",
+          "with": {
+            "terraform_version": "1.9.8",
+            "terraform_wrapper": "false"
+          }
+        },
+        {
+          "id": "terraform-context",
+          "name": "terraform-context",
+          "phase": "main",
+          "run": "terraform version\necho \"Reconciling Cloudflare Pages project example-platform-admin-console from ../../infra/cloudflare-pages-admin-console\"\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-fmt-check",
+          "name": "terraform-fmt-check",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console fmt -check",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-init",
+          "name": "terraform-init",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console init -input=false",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-validate",
+          "name": "terraform-validate",
+          "phase": "main",
+          "run": "terraform -chdir=../../infra/cloudflare-pages-admin-console validate -no-color",
+          "onFailure": "stop"
+        },
+        {
+          "id": "terraform-plan-or-apply",
+          "name": "terraform-plan-or-apply",
+          "phase": "main",
+          "run": "cloudflare_account_id=\"${CLOUDFLARE_ACCOUNT_ID:-00000000000000000000000000000000}\"\n\nterraform_args=(\n  \"-input=false\"\n  \"-var=account_id=${cloudflare_account_id}\"\n  \"-var=project_name=example-platform-admin-console\"\n  \"-var=production_branch=main\"\n  \"-var=repo_owner=sourceplane\"\n  \"-var=repo_name=example-platform-repo\"\n  \"-var=build_command=corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console\"\n  \"-var=destination_dir=dist\"\n  \"-var=root_dir=.\"\n)\n\nif [ \"production\" = \"production\" ] \u0026\u0026 [ \"${GITHUB_REF:-}\" = \"refs/heads/main\" ]; then\n  : \"${CLOUDFLARE_ACCOUNT_ID:?CLOUDFLARE_ACCOUNT_ID is required for apply}\"\n  : \"${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required for apply}\"\n  terraform -chdir=../../infra/cloudflare-pages-admin-console apply -auto-approve \"${terraform_args[@]}\"\n  exit 0\nfi\n\nif [ -z \"${CLOUDFLARE_API_TOKEN:-}\" ] || [ -z \"${CLOUDFLARE_ACCOUNT_ID:-}\" ]; then\n  echo \"Skipping terraform plan because Cloudflare credentials are not available outside deployment contexts.\"\n  exit 0\nfi\n\nterraform -chdir=../../infra/cloudflare-pages-admin-console plan -lock=false -no-color \"${terraform_args[@]}\"\n",
+          "shell": "bash",
+          "onFailure": "stop"
+        }
+      ],
+      "timeout": "35m",
+      "env": {
+        "cloudflareBuildCommand": "corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console",
+        "destinationDir": "dist",
+        "lane": "release",
+        "namespacePrefix": "prod-",
+        "nodeVersion": "20",
+        "outputDir": "dist",
+        "pnpmVersion": "10.12.1",
+        "productionBranch": "main",
+        "projectName": "example-platform-admin-console",
+        "repoName": "example-platform-repo",
+        "repoOwner": "sourceplane",
+        "rootDir": ".",
+        "terraformDir": "../../infra/cloudflare-pages-admin-console",
+        "terraformVersion": "1.9.8"
+      },
+      "labels": {
+        "layer": "foundation",
+        "runtime": "cloudflare",
+        "surface": "admin-console",
+        "team": "platform"
+      },
+      "config": {
+        "cloudflareBuildCommand": "corepack enable \u0026\u0026 pnpm turbo run build --filter=@example/admin-console",
+        "destinationDir": "dist",
+        "lane": "release",
+        "namespacePrefix": "prod-",
+        "nodeVersion": "20",
+        "outputDir": "dist",
+        "pnpmVersion": "10.12.1",
+        "productionBranch": "main",
+        "projectName": "example-platform-admin-console",
+        "repoName": "example-platform-repo",
+        "repoOwner": "sourceplane",
+        "rootDir": ".",
+        "terraformDir": "../../infra/cloudflare-pages-admin-console",
+        "terraformVersion": "1.9.8"
+      }
+    }
+  ]
+}
