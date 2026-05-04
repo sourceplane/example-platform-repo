@@ -1,6 +1,7 @@
 .providers/
 .workspace/
-.orun/
+.orun/*
+!.orun/compositions.lock.yaml
 .artifacts/
 .pnpm-store/
 .turbo/
