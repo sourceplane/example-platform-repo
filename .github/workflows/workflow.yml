@@ -61,16 +61,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - uses: sourceplane/orun-action/run@v1.1.0
-      #   with:
-      #     plan: plan.json
-      #     job: ${{ matrix.job-id }}
-      #     download-artifact: true
-      #     artifact-name: orun-plan
-      #     remote-state: true
-      #     backend-url: ${{ vars.ORUN_BACKEND_URL }}
-      #     exec-id: ${{ github.run_id }}-${{ github.run_attempt }}
-      #     dry-run: ${{ vars.ORUN_DRY_RUN || 'false' }}
+      - uses: sourceplane/orun-action@v1.1.0
+
       - name: run job steps
         run: |
           orun run \
