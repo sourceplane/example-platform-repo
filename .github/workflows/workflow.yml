@@ -31,7 +31,7 @@ jobs:
           changed-only: true
 
   execute:
-    name: ${{ matrix.job-id }}
+    name: "${{ matrix.component }}@${{ matrix.environment }} › ${{ matrix.job }} · ${{ matrix.composition }} · ${{ matrix.path }}"
     needs: plan
     if: needs.plan.outputs.job-ids != '[]'
     runs-on: ubuntu-latest
