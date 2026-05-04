@@ -116,3 +116,9 @@ jobs:
           backend-url: ${{ vars.ORUN_BACKEND_URL }}
           exec-id: ${{ github.run_id }}-${{ github.run_attempt }}
           dry-run: ${{ vars.ORUN_DRY_RUN || 'true' }}
+      - uses: sourceplane/kiox-action@v2.1.2
+        with:
+          providers: |
+            sourceplane/orun as orun
+          run: |
+            orun plan --changed
