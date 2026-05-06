@@ -1,9 +1,7 @@
 .providers/
 .workspace/
-.liteci/
-.liteci-state.json
-.gluon/
-.gluon-state.json
+.orun/*
+!.orun/compositions.lock.yaml
 .artifacts/
 .pnpm-store/
 .turbo/
