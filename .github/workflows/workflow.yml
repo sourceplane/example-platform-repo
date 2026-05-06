@@ -12,35 +12,45 @@ permissions:
 
 env:
   GITHUB_TOKEN: ${{ github.token }}
-  ORUN_BACKEND_URL: ${{ vars.ORUN_BACKEND_URL }}
+  ORUN_BACKEND_URL: https://orun-api.sourceplane.ai
 
 jobs:
   plan:
     name: Orun Plan
     runs-on: ubuntu-latest
     outputs:
-      job-ids: ${{ steps.plan.outputs.job-ids }}
+      job-matrix: ${{ steps.plan.outputs.job-matrix }}
       plan-checksum: ${{ steps.plan.outputs.plan-checksum }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: sourceplane/orun-action/plan@v1.1.0
+      - uses: sourceplane/orun-action@v1.1.0
+      - name: Plan with Orun
         id: plan
+        run: |
+          orun plan \
+            --changed \
+            --intent examples/intent.yaml \
+            --output plan.json
+          echo "plan-checksum=$(jq -r '.metadata.checksum | ltrimstr("sha256-") | .[0:12]' plan.json)" >> $GITHUB_OUTPUT
+          echo "job-matrix=$(jq -c '[.jobs[] | {"job-id": .id, "job-name": .checkName}]' plan.json)" >> $GITHUB_OUTPUT
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
         with:
-          intent: intent.yaml
-          changed-only: true
+          name: orun-plan
+          path: plan.json
 
   execute:
-    name: ${{ matrix.job-id }}
+    name: ${{ matrix.job-name }}
     needs: plan
-    if: needs.plan.outputs.job-ids != '[]'
+    if: needs.plan.outputs.job-matrix != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
-        job-id: ${{ fromJson(needs.plan.outputs.job-ids) }}
+        include: ${{ fromJson(needs.plan.outputs.job-matrix) }}
     concurrency:
       group: orun-${{ github.ref }}-${{ matrix.job-id }}
       cancel-in-progress: false
